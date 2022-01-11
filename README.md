@@ -1,5 +1,8 @@
 # mlnsdk
-C++ 서버 프레임워크
+C++ 서버 프레임워크. header-only library.   
+
+[mlnserver](https://github.com/lazychase/mlnserver) : Sample Server Project
+
 
 
 
