@@ -7,18 +7,24 @@ C++ 서버 프레임워크. header-only library.
 
 
 # Required
+* c++20
+  * msvc : visual studio 2019 16.11 이상
+  * linux : gcc11
 * CMake [>=3.12 <= 3.18]
 * Boost 1.78
 * [cpprestsdk](https://github.com/microsoft/cpprestsdk)
+* openSSL
+* AWS SDK for C++
+* MySQL Connector/C++ 8.x
 
 ### CMake
-개인 개발은 무조건 최신버젼을 써서 남들보다 먼저 새로운 경험(Good or Bad)을 해보자는 생각인데  [AWS SDK for C++ 를 빌드](https://docs.aws.amazon.com/sdk-for-cpp/v1/developer-guide/setup-linux.html)하려면 3.18 이하 버젼이어야만 된다고 합니다.
+[AWS SDK for C++ 를 빌드](https://docs.aws.amazon.com/sdk-for-cpp/v1/developer-guide/setup-linux.html)하려면 3.18 이하 버젼이어야 합니다.
 ```
  (minimum version 3.2; maximum version 3.18)
 ```
 
 ### Boost
-예전 버젼(minimux 1.72)도 현재는 가능합니다. beast를 써서 websocket 을 지원하는 sesison 을 구현할 예정이라 앞으로는 모릅니다.
+예전 버젼(minimum 1.72)도 현재는 가능합니다. 
 
 
 ### cpprestsdk
@@ -28,8 +34,19 @@ json 파서의 종류는 cmake 의 컴파일 옵션을 수정하여 다른 json 라이브러리를 선택하
 
 
 # Dependancies
-* [spdlog](https://github.com/gabime/spdlog)
-### 
+* [spdlog](https://github.com/gabime/spdlog)  
+  
+  
+
+## 빠르게 서버 개발을 시작하기 위해서
+json 문자열을 기반으로 패킷을 추가할 수 있도록 패킷 프로토콜과 파서가 준비되어 있습니다.
 
 
+## 커스텀 패킷 디자인
+사용자는 자신의 패킷프로토콜을 정의할 수 있습니다.
+* 프로토콜 구조체
+* 패킷 구조체 파싱 함수
+* 패킷 핸들러 함수
 
+## 교체가 가능한 Json 라이브러리
+기본 제공하는 PacketJsonHandler 에서는 Json 타입을 템플릿 파라미터로 사용하고 있어서 사용자가 파상함수를 제공하여 원하는 라이브러리로 교체사용이 가능합니다.
