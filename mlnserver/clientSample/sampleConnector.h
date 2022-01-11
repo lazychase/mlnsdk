@@ -11,6 +11,16 @@
 
 #include <cpprest/http_client.h>
 
+#ifndef CONV_UTF8
+#ifdef WIN32
+#define CONV_UTF8(msg) utility::conversions::to_utf8string(msg)
+#define CONV_STRT(msg) utility::conversions::to_string_t(msg)
+#else
+#define CONV_UTF8(msg)  msg
+#define CONV_STRT(msg)  msg
+#endif
+#endif//#ifndef CONV_UTF8
+
 namespace mlnserver {
 
 	class SampleConnector
@@ -69,7 +79,7 @@ namespace mlnserver {
 				assert(url == "/lobby/login");
 
 				LOGD("received packet from server. (S->C) url:{}", url);
-				std::wcout << jv.serialize() << std::endl;
+				std::cout << CONV_UTF8(jv.serialize()) << std::endl;
 			});
 		}
 
