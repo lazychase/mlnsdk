@@ -1,6 +1,7 @@
 #pragma once
 
 #include <atomic>
+#include <memory>
 #include "eventReceiver.hpp"
 #include "netServiceAcceptorTcp.hpp"
 #include "netServiceConnectorTcp.hpp"
@@ -91,14 +92,14 @@ namespace mln::net {
 			s_ioc = &svcParams.ioc_;
 		}
 
-		if (s_acceptors.size() <= acceptorIdx) {
-			s_acceptors.resize(acceptorIdx + 1);
+		if (mln::net::s_acceptors.size() <= acceptorIdx) {
+			mln::net::s_acceptors.resize(acceptorIdx + 1);
 		}
 
-		if (!s_acceptors[acceptorIdx]) {
-			s_acceptors[acceptorIdx] = std::make_shared<NetService>(svcParams, userParams, acceptorIdx);
+		if (!mln::net::s_acceptors[acceptorIdx]) {
+			mln::net::s_acceptors[acceptorIdx] = std::make_shared<NetService>(svcParams, userParams, acceptorIdx);
 
-			if (s_acceptors[acceptorIdx]->_accepterTcp->acceptWait(
+			if (mln::net::s_acceptors[acceptorIdx]->_accepterTcp->acceptWait(
 				userParams.addr
 				, userParams.port
 				, userParams.workerThreadsCount
@@ -116,21 +117,21 @@ namespace mln::net {
 
 		}
 
-		return s_acceptors[acceptorIdx];
+		return mln::net::s_acceptors[acceptorIdx];
 	}
 
 	static AcceptorPtrType createAcceptor(
 		ServiceParams& svcParams
 		, AcceptorUserParams& userParams) {
-		return createTcpAcceptor(s_acceptors.size(), svcParams, userParams);
+		return createTcpAcceptor(mln::net::s_acceptors.size(), svcParams, userParams);
 	}
 
 	static std::optional< AcceptorPtrType > getAcceptor(const size_t acceptorIdx) {
-		assert(s_acceptors.size() > acceptorIdx);
-		if (s_acceptors.size() <= acceptorIdx) {
+		assert(mln::net::s_acceptors.size() > acceptorIdx);
+		if (mln::net::s_acceptors.size() <= acceptorIdx) {
 			return std::nullopt;
 		}
-		return s_acceptors[acceptorIdx];
+		return mln::net::s_acceptors[acceptorIdx];
 	}
 
 
@@ -214,15 +215,15 @@ namespace mln::net {
 			s_ioc = &svcParams.ioc_;
 		}
 
-		if (s_connectors.size() <= connectorIdx) {
-			s_connectors.resize(connectorIdx + 1);
+		if (mln::net::s_connectors.size() <= connectorIdx) {
+			mln::net::s_connectors.resize(connectorIdx + 1);
 		}
 
-		if (!s_connectors[connectorIdx]) {
-			s_connectors[connectorIdx] = std::make_shared<NetService>(svcParams, userParams);
+		if (!mln::net::s_connectors[connectorIdx]) {
+			mln::net::s_connectors[connectorIdx] = std::make_shared<NetService>(svcParams, userParams);
 		}
 
-		return s_connectors[connectorIdx];
+		return mln::net::s_connectors[connectorIdx];
 	}
 
 
@@ -230,7 +231,7 @@ namespace mln::net {
 		ServiceParams& svcParams
 		, ConnectorUserParams& userParams
 	){
-		return createTcpConnector(s_connectors.size(), svcParams, userParams);
+		return createTcpConnector(mln::net::s_connectors.size(), svcParams, userParams);
 	}
 
 
