@@ -1,6 +1,22 @@
 # Prerequisites
 *.d
 
+.vs/
+Debug/
+CMakeFiles/
+out/
+vendor/
+Makefile
+#*.cmake
+cmake_install.cmake
+
+.editorconfig
+.gitattributes
+
+# Node artifact files
+node_modules/
+dist/
+
 # Compiled Object files
 *.slo
 *.lo
