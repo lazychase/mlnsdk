@@ -60,7 +60,7 @@ bool acceptSpecificParser()
 
 	static ServiceEventReceiver eventReceiver;
 
-	auto acceptor = registAcceptor(
+	auto acceptor = NetService::registAcceptor(
 		eventReceiver
 		, *g_ioc.get()
 		, PacketJsonParser::parse
@@ -82,7 +82,7 @@ bool acceptDefaultJsonParser()
 
 	static ServiceEventReceiver eventReceiver;
 
-	auto acceptor = accept(
+	auto acceptor = NetService::accept(
 		eventReceiver
 		, *g_ioc.get()
 		, 9090
@@ -104,7 +104,7 @@ bool ioServiceThread()
 	acceptDefaultJsonParser();
 	//acceptSpecificParser();
 
-	runService([](){
+	NetService::runService([](){
 		LOGI("server started.");
 
 		// sample client

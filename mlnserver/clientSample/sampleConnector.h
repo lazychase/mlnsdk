@@ -104,7 +104,7 @@ namespace mlnserver {
 				, port
 			};
 
-			auto svc = mln::net::createConnector(
+			auto svc = mln::net::NetService::createConnector(
 				serviceInitParamsForClnt
 				, connectorUserParam
 			);
@@ -119,7 +119,7 @@ namespace mlnserver {
 		{
 			static SampleConnector connectorInstance;
 
-			auto svc = mln::net::registConnector(
+			auto svc = mln::net::NetService::registConnector(
 				connectorInstance
 				, ioc
 				, mln::net::PacketJsonParser::parse
@@ -140,7 +140,7 @@ namespace mlnserver {
 		{
 			static SampleConnector connectorInstance;
 
-			mln::net::connect(
+			mln::net::NetService::connect(
 				connectorInstance
 				, ioc
 				, "127.0.0.1"
