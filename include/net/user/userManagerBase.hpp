@@ -32,11 +32,13 @@ namespace mln::net {
 			//typedef std::decay<decltype(ROOM_PROTOCOL::PT_SERVER_TIME::timeOnServer)>::type timeType;
 			//serverTime.timeOnServer = (timeType)time(NULL);
 			//user->send(serverTime);
+			return true;
 		}
 
 		bool decryptPacket(const EncType::Type encType, Session::sptr conn
 			, uint32_t packetSize, ByteStream& packet, ByteStream& decryptedPacket) {
 			//const int decryptedSize = user->decrypt( ... //
+			return true;
 		}
 		
 		template < typename T >

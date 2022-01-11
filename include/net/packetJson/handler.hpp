@@ -1,6 +1,5 @@
 #pragma once
 
-#include <format>
 #include <tuple>
 #include "protocol.h"
 #include "packetParser.hpp"
@@ -115,7 +114,7 @@ namespace mln::net {
 				}
 			}
 			else {
-				exceptionHandler(std::format("invalid url:{}", url).c_str());
+				exceptionHandler( ("invalid url:"+url).c_str());
 			}
 		}
 

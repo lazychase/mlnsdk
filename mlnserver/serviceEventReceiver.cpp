@@ -7,6 +7,14 @@
 using namespace mlnserver;
 using namespace mln::net;
 
+#ifdef WIN32
+#define CONV_UTF8(msg) utility::conversions::to_utf8string(msg)
+#define CONV_STRT(msg) utility::conversions::to_string_t(msg)
+#else
+#define CONV_UTF8(msg)  msg
+#define CONV_STRT(msg)  msg
+#endif
+
 void ServiceEventReceiver::onAccept(Session::sptr session)
 {
 	auto [addr, port] = session->getEndPointSocket();
@@ -71,7 +79,7 @@ void ServiceEventReceiver::initHandler(PacketProcedure* packetProcedure)
 
 		LOGD("received packet from client. (C->S) url:{}", url);
 		auto receivedJsonString = jv.serialize();
-		std::wcout << receivedJsonString << std::endl;
+		std::cout << CONV_UTF8(receivedJsonString) << std::endl;
 
 
 		auto user = std::static_pointer_cast<User>(userBase);
