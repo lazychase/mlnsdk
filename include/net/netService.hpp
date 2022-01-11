@@ -25,8 +25,6 @@ namespace mln::net {
 	inline static boost::asio::io_context* s_ioc = nullptr;
 	inline static std::vector<std::shared_ptr<boost::thread>> s_threads;
 
-	static AcceptorPtrType createAcceptor(ServiceParams& svcParams, AcceptorUserParams& userParams);
-
 	class NetService
 	{
 	public:
@@ -167,7 +165,7 @@ namespace mln::net {
 			, sessionType
 		};
 
-		return createAcceptor(
+		return mln::net::createAcceptor(
 			serviceInitParams
 			, acceptorParams
 		);
@@ -202,7 +200,7 @@ namespace mln::net {
 			, sessionType
 		};
 
-		return createAcceptor(
+		return mln::net::createAcceptor(
 			serviceInitParams
 			, acceptorParams
 		);
@@ -266,7 +264,7 @@ namespace mln::net {
 			, sessionType
 		};
 
-		return createConnector(
+		return mln::net::createConnector(
 			serviceInitParams
 			, connectorParam
 		);
@@ -299,7 +297,7 @@ namespace mln::net {
 			, sessionType
 		};
 
-		auto svc = createConnector(
+		auto svc = mln::net::createConnector(
 			serviceInitParams
 			, connectorParam
 		);

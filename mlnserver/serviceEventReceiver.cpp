@@ -7,6 +7,7 @@
 using namespace mlnserver;
 using namespace mln::net;
 
+#ifndef CONV_UTF8
 #ifdef WIN32
 #define CONV_UTF8(msg) utility::conversions::to_utf8string(msg)
 #define CONV_STRT(msg) utility::conversions::to_string_t(msg)
@@ -14,6 +15,7 @@ using namespace mln::net;
 #define CONV_UTF8(msg)  msg
 #define CONV_STRT(msg)  msg
 #endif
+#endif//#ifndef CONV_UTF8
 
 void ServiceEventReceiver::onAccept(Session::sptr session)
 {
