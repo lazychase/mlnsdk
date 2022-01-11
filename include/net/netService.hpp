@@ -25,34 +25,14 @@ namespace mln::net {
 	inline static boost::asio::io_context* s_ioc = nullptr;
 	inline static std::vector<std::shared_ptr<boost::thread>> s_threads;
 
+	static AcceptorPtrType createAcceptor(ServiceParams& svcParams, AcceptorUserParams& userParams);
+
 	class NetService
 	{
 	public:
-		NetService(ServiceParams& svcParams, AcceptorUserParams& acceptorParams, const size_t connectorIdx = 0)
-			//: _ioc(params.ioc_)
-			//, _strand(params.ioc_)
-			//, _updater(params.ioc_, boost::posix_time::milliseconds(params.serviceUpdateTimeMs_))
-			//, _manip(params.manip_)
-		{
-
-			/*_packetProc = new PacketProcedure(params.packetParser_, params.manip_);
-
-			params.receiver_.clone(&_eventReceiver);
-			_eventReceiver.initHandler(_packetProc);
-
-			_accepterTcp = std::make_unique<NetServiceAcceptorTcp>(
-				_ioc
-				, _strand
-				, *_packetProc
-				, _eventReceiver
-				, params.keepAliveTimeMs_
-				);*/
-
-			//_packetProc = new PacketProcedure(svcParams.packetParser_, svcParams.manip_);
-
-			//svcParams.receiver_.clone(&_eventReceiver);
-			//_eventReceiver.initHandler(_packetProc);
-
+		NetService(ServiceParams& svcParams, AcceptorUserParams& acceptorParams
+			, const size_t connectorIdx = 0
+		){
 			_accepterTcp = std::make_unique<NetServiceAcceptorTcp>(
 				svcParams
 				, acceptorParams
@@ -61,26 +41,9 @@ namespace mln::net {
 		}
 
 
-		NetService(ServiceParams& svcParams, ConnectorUserParams& connectorParam, const size_t connectorIdx = 0)
-			//: _ioc(params.ioc_)
-			//, _strand(params.ioc_)
-			//, _updater(params.ioc_, boost::posix_time::milliseconds(params.serviceUpdateTimeMs_))
-			//, _manip(params.manip_)
-			//, _updateTimeMs(params.serviceUpdateTimeMs_)
-		{
-			//_packetProc = new PacketProcedure(params.packetParser_, params.manip_);
-
-			//params.receiver_.clone(&_eventReceiver);
-			//_eventReceiver.initHandler(_packetProc);
-
-			//_connectorTcp = std::make_unique<NetServiceConnectorTcp>(
-			//	_ioc
-			//	, _strand
-			//	, *_packetProc
-			//	, _eventReceiver
-			//	, params.keepAliveTimeMs_
-			//	);
-
+		NetService(ServiceParams& svcParams, ConnectorUserParams& connectorParam
+			, const size_t connectorIdx = 0
+		){
 			_connectorTcp = std::make_unique<NetServiceConnectorTcp>(
 				svcParams
 				, connectorParam
@@ -89,25 +52,13 @@ namespace mln::net {
 			_connectorTcp->_netObj.setIndex(connectorIdx);
 		}
 
-		
-
-		//virtual ~NetService() {
-		//	/*delete _packetProc;*/
-		//}
-
 	public:
-		//boost::asio::io_context&			_ioc;
-		//boost::asio::io_context::strand		_strand;
 		std::shared_ptr< NetServiceAcceptorTcp > _accepterTcp;
 		std::shared_ptr< NetServiceConnectorTcp > _connectorTcp;
 
 	protected:
 		
 		inline static std::atomic< size_t > s_identitySeed = { 1 };
-
-		//EventReceiver _eventReceiver;
-		//PacketManipulator* _manip = nullptr;
-		//PacketProcedure* _packetProc = nullptr;
 	};//class NetService
 
 
@@ -186,7 +137,7 @@ namespace mln::net {
 
 
 	template <typename EVENT_RECEIVER_TYPE>
-	std::shared_ptr<NetService> registAcceptor(EVENT_RECEIVER_TYPE& eventReceiver
+	AcceptorPtrType registAcceptor(EVENT_RECEIVER_TYPE& eventReceiver
 		, boost::asio::io_context& ioc
 		, PacketProcedure::CustomPacketParser packetParser
 		, PacketManipulator* packetManip
@@ -223,7 +174,7 @@ namespace mln::net {
 	};
 
 	template <typename EVENT_RECEIVER_TYPE>
-	std::shared_ptr<NetService> accept(EVENT_RECEIVER_TYPE& eventReceiver
+	AcceptorPtrType accept(EVENT_RECEIVER_TYPE& eventReceiver
 		, boost::asio::io_context& ioc
 		, const uint16_t bindingPort
 		, const uint32_t ioWorkerCnt = 0
