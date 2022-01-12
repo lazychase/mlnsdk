@@ -208,6 +208,7 @@ namespace mln::net
 				}
 			}
 
+		private:
 			GlobalConfig global_;
 			Config console_;
 			ConfigFile file_;
