@@ -21,21 +21,7 @@ int main(int argc, char* argv[])
 	using namespace mln::net;
 
 	// init logger
-	Logger::instance().Create()
-		.global()
-			.loggerName("mln-server-log")
-			.flushEverySec(0)
-		.console()
-			.lv(spdlog::level::trace)
-			.pattern(nullptr)
-		.file()
-			.lv(spdlog::level::trace)
-			.pattern(nullptr)
-			.fileNameBase("mln-server")
-			.maxFileSize(1048576 * 100)
-			.maxFiles(30)
-		.done();
-
+	Logger::createDefault();
 	LOGD("logger initialized");
 
 

@@ -31,6 +31,24 @@ namespace mln::net
 	{
 	public:
 		static Logger& instance() {static Logger _instance;return _instance;}
+		
+		static void createDefault() {
+
+			Logger::instance().Create()
+				.global()
+					.loggerName("mln-server-log")
+					.flushEverySec(0)
+				.console()
+					.lv(spdlog::level::trace)
+					.pattern(nullptr)
+				.file()
+					.lv(spdlog::level::trace)
+					.pattern(nullptr)
+				.fileNameBase("mln-server")
+					.maxFileSize(1048576 * 100)
+					.maxFiles(30)
+				.done();
+		}
 
 	public:
 		class Initializer;
