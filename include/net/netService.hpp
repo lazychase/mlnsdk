@@ -3,9 +3,8 @@
 #include <atomic>
 #include <memory>
 #include "eventReceiver.hpp"
-#include "netServiceAcceptorTcp.hpp"
-#include "netServiceConnectorTcp.hpp"
-//#include "serviceFunctions.hpp"
+#include "netServiceAcceptor.hpp"
+#include "netServiceConnector.hpp"
 #include "serviceParamTypes.h"
 #include "packetJson/packetParser.hpp"
 
@@ -33,28 +32,28 @@ namespace mln::net {
 		NetService(ServiceParams& svcParams, AcceptorUserParams& acceptorParams
 			, const size_t connectorIdx = 0
 		) {
-			_accepterTcp = std::make_unique<NetServiceAcceptorTcp>(
+			_accepter = std::make_unique<NetServiceAcceptor>(
 				svcParams
 				, acceptorParams
 				);
-			_accepterTcp->_netObj.setIndex(connectorIdx);
+			_accepter->_netObj.setIndex(connectorIdx);
 		}
 
 
 		NetService(ServiceParams& svcParams, ConnectorUserParams& connectorParam
 			, const size_t connectorIdx = 0
 		) {
-			_connectorTcp = std::make_unique<NetServiceConnectorTcp>(
+			_connector = std::make_unique<NetServiceConnector>(
 				svcParams
 				, connectorParam
 				);
 
-			_connectorTcp->_netObj.setIndex(connectorIdx);
+			_connector->_netObj.setIndex(connectorIdx);
 		}
 
 	public:
-		std::shared_ptr< NetServiceAcceptorTcp > _accepterTcp;
-		std::shared_ptr< NetServiceConnectorTcp > _connectorTcp;
+		std::shared_ptr< NetServiceAcceptor > _accepter;
+		std::shared_ptr< NetServiceConnector > _connector;
 
 	protected:
 		inline static std::atomic< size_t > s_identitySeed = { 1 };
@@ -101,7 +100,7 @@ namespace mln::net {
 			if (!s_acceptors[acceptorIdx]) {
 				s_acceptors[acceptorIdx] = std::make_shared<NetService>(svcParams, userParams, acceptorIdx);
 
-				if (s_acceptors[acceptorIdx]->_accepterTcp->acceptWait(
+				if (s_acceptors[acceptorIdx]->_accepter->acceptWait(
 					userParams.addr
 					, userParams.port
 					, userParams.port + 1
@@ -306,7 +305,7 @@ namespace mln::net {
 				, connectorParam
 			);
 
-			svc->_connectorTcp->connectWait(
+			svc->_connector->connectWait(
 				1	// session count
 				, 0	// 
 			);

@@ -10,10 +10,10 @@
 
 namespace mln::net {
 
-	class NetServiceConnectorTcp
+	class NetServiceConnector
 	{
 	public:
-		NetServiceConnectorTcp(
+		NetServiceConnector(
 			ServiceParams& svcParams
 			, ConnectorUserParams& connectorParams
 		)
@@ -88,7 +88,7 @@ namespace mln::net {
 				////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				session->socket().async_connect((*_iterEndPoint)->endpoint()
 					, boost::asio::bind_executor(_netObj._strand, boost::bind(
-						&NetServiceConnectorTcp::handleConnectAsync
+						&NetServiceConnector::handleConnectAsync
 						, this
 						, boost::asio::placeholders::error
 						, (*_iterEndPoint), session, sessionCnt - 1)));
@@ -181,7 +181,7 @@ namespace mln::net {
 					session->socket().async_connect(iterEndpoint->endpoint()
 						, boost::asio::bind_executor(_netObj._strand
 							, boost::bind(
-								&NetServiceConnectorTcp::handleConnectAsync
+								&NetServiceConnector::handleConnectAsync
 								, this
 								, boost::asio::placeholders::error
 								, iterEndpoint, session, remainCnt - 1)));

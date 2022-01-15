@@ -11,10 +11,10 @@
 #include "netCommonObjects.hpp"
 
 namespace mln::net {
-	class NetServiceAcceptorTcp
+	class NetServiceAcceptor
 	{
 	public:
-		NetServiceAcceptorTcp(
+		NetServiceAcceptor(
 			ServiceParams& svcParams
 			, AcceptorUserParams& acceptorParams
 		)
@@ -96,7 +96,7 @@ namespace mln::net {
 			}
 			_acceptorSocketTcp.async_accept(sessionTcpOpt.value()->socket()
 				, boost::asio::bind_executor(_netObj._strand, boost::bind(
-					&NetServiceAcceptorTcp::handleAccept, this, boost::asio::placeholders::error, sessionTcpOpt.value())));
+					&NetServiceAcceptor::handleAccept, this, boost::asio::placeholders::error, sessionTcpOpt.value())));
 
 
 			// handle web socket
@@ -107,7 +107,7 @@ namespace mln::net {
 			}
 			_acceptorSocketWeb.async_accept(sessionWebOpt.value()->socket()
 				, boost::asio::bind_executor(_netObj._strand, boost::bind(
-					&NetServiceAcceptorTcp::handleWebsocketLayer, this, boost::asio::placeholders::error, sessionWebOpt.value())));
+					&NetServiceAcceptor::handleWebsocketLayer, this, boost::asio::placeholders::error, sessionWebOpt.value())));
 
 
 			_netObj.expireTimerReady();
@@ -144,7 +144,7 @@ namespace mln::net {
 				websocket.async_accept(
 					boost::asio::bind_executor(_netObj._strand
 						, boost::bind(
-							&NetServiceAcceptorTcp::handleAccept
+							&NetServiceAcceptor::handleAccept
 							, this
 							, boost::asio::placeholders::error
 							, session)));
@@ -177,12 +177,12 @@ namespace mln::net {
 				if (SessionType::TCP == newSession->_sessionType) {
 					_acceptorSocketTcp.async_accept(newSession->socket()
 						, boost::asio::bind_executor(_netObj._strand, boost::bind(
-							&NetServiceAcceptorTcp::handleAccept, this, boost::asio::placeholders::error, newSession)));
+							&NetServiceAcceptor::handleAccept, this, boost::asio::placeholders::error, newSession)));
 				}
 				else {
 					_acceptorSocketWeb.async_accept(newSession->socket()
 						, boost::asio::bind_executor(_netObj._strand, boost::bind(
-							&NetServiceAcceptorTcp::handleWebsocketLayer, this, boost::asio::placeholders::error, newSession)));
+							&NetServiceAcceptor::handleWebsocketLayer, this, boost::asio::placeholders::error, newSession)));
 				}
 				
 			}

@@ -14,8 +14,8 @@ namespace mln::net {
 	{
 		friend class Session;
 		friend class NetService;
-		friend class NetServiceAcceptorTcp;
-		friend class NetServiceConnectorTcp;
+		friend class NetServiceAcceptor;
+		friend class NetServiceConnector;
 
 
 	public:
