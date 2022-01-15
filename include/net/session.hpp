@@ -1,5 +1,10 @@
 ﻿#pragma once
 
+#ifdef MLN_USE_BEAST_WEBSOCKET
+#include <boost/beast.hpp>
+#include <boost/beast/websocket.hpp>
+#endif
+
 #include <functional>
 #include <memory>
 #include <optional>
@@ -20,6 +25,9 @@ namespace mln::net
 {
 
 	class UserBase;
+
+	using MLN_SOCKET_TCP = boost::asio::ip::tcp::socket;
+	using MLN_SOCKET_WEB = boost::beast::websocket::stream<boost::beast::tcp_stream>;
 
 	class Session
 		: public std::enable_shared_from_this< Session >
@@ -50,10 +58,14 @@ namespace mln::net
 			: _sessionType(sessionType)
 			, _ioc(ioc)
 			, _socket(ioc)
+#ifdef MLN_USE_BEAST_WEBSOCKET
+			, _socketWeb(ioc)
+#endif
 			, _strand(ioc)
 			, _keepAliveTimer(ioc)
 			, _closeReserveTimer(ioc)
 		{
+			_socketWeb.binary(true);
 		}
 
 		Session(const SessionType sessionType, boost::asio::io_context& ioc
@@ -64,6 +76,9 @@ namespace mln::net
 			: _sessionType(sessionType)
 			, _ioc(ioc)
 			, _socket(ioc)
+#ifdef MLN_USE_BEAST_WEBSOCKET
+			, _socketWeb(ioc)
+#endif
 			, _strand(ioc)
 			, _socketStatus(SocketStatus::CLOSED)
 			, _packetManipulator(packetManip)
@@ -74,6 +89,7 @@ namespace mln::net
 			, _eventReceiver(evntReceiver)
 			/*, _connectionID(connectionID)*/
 		{
+			_socketWeb.binary(true);
 		}
 
 		static sptr create(const SessionType sessionType
@@ -99,7 +115,39 @@ namespace mln::net
 		void setSocketStatus(const SocketStatus s) { _socketStatus = s; }
 		SocketStatus getSocketStatus() const { return _socketStatus; }
 
-		boost::asio::ip::tcp::socket& socket() {return _socket;}
+		boost::asio::ip::tcp::socket& socket() {
+#ifdef MLN_USE_BEAST_WEBSOCKET
+			if (SessionType::TCP == _sessionType) {
+				return _socket;
+			}
+			else {
+				return _socketWeb.next_layer().socket();
+			}
+#else
+			return _socket;
+#endif
+		}
+
+		const boost::asio::ip::tcp::socket& socket() const {
+#ifdef MLN_USE_BEAST_WEBSOCKET
+			if (SessionType::TCP == _sessionType) {
+				return _socket;
+			}
+			else {
+				return _socketWeb.next_layer().socket();
+			}
+#else
+			return _socket;
+#endif
+		}
+
+#ifdef MLN_USE_BEAST_WEBSOCKET
+		boost::beast::websocket::stream<boost::beast::tcp_stream>& websocket() {
+			return _socketWeb;
+		}
+
+#endif
+
 		boost::asio::io_context::strand& strand() { return _strand; }
 
 		void startAccept() {
@@ -107,37 +155,59 @@ namespace mln::net
 				new ByteStream()
 			);
 
-			_socket.set_option(boost::asio::ip::tcp::no_delay(true));
-			_socket.set_option(boost::asio::socket_base::linger(true, 0));
+			socket().set_option(boost::asio::ip::tcp::no_delay(true));
+			socket().set_option(boost::asio::socket_base::linger(true, 0));
 
-			_socket.async_read_some(
-				boost::asio::buffer(_recvBuffer, sizeof(_recvBuffer))
-				, boost::asio::bind_executor(_strand
-					, boost::bind(&Session::handleRead
-						, shared_from_this()
-						, boost::asio::placeholders::error
-						, boost::asio::placeholders::bytes_transferred)));
+			if (SessionType::TCP == _sessionType) {
+				socket().async_read_some(
+					boost::asio::buffer(_recvBuffer, sizeof(_recvBuffer))
+					, boost::asio::bind_executor(_strand
+						, boost::bind(&Session::handleRead
+							, shared_from_this()
+							, boost::asio::placeholders::error
+							, boost::asio::placeholders::bytes_transferred)));
+			}
+			else {
+				websocket().async_read(
+					_recvBufferWeb
+					, boost::asio::bind_executor(_strand
+						, boost::bind(&Session::handleRead
+							, shared_from_this()
+							, boost::asio::placeholders::error
+							, boost::asio::placeholders::bytes_transferred)));
+			}
 
 			_socketStatus = SocketStatus::OPEN;
 
 			renewExpireTime();
 
 		}
-		void startConnect() {
+		void startConnect(const SessionType sessionType = SessionType::TCP) {
 			_recvStream = ByteStream::sptr(
 				new ByteStream()
 			);
 
-			_socket.set_option(boost::asio::ip::tcp::no_delay(true));
-			_socket.set_option(boost::asio::socket_base::linger(true, 0));
+			socket().set_option(boost::asio::ip::tcp::no_delay(true));
+			socket().set_option(boost::asio::socket_base::linger(true, 0));
 
-			_socket.async_read_some(
-				boost::asio::buffer(_recvBuffer, sizeof(_recvBuffer))
-				, boost::asio::bind_executor(_strand
-					, boost::bind(&Session::handleRead
-						, shared_from_this()
-						, boost::asio::placeholders::error
-						, boost::asio::placeholders::bytes_transferred)));
+			if (SessionType::TCP == sessionType) {
+				socket().async_read_some(
+					boost::asio::buffer(_recvBuffer, sizeof(_recvBuffer))
+					, boost::asio::bind_executor(_strand
+						, boost::bind(&Session::handleRead
+							, shared_from_this()
+							, boost::asio::placeholders::error
+							, boost::asio::placeholders::bytes_transferred)));
+			}
+			else {
+				websocket().async_read(
+					_recvBufferWeb
+					, boost::asio::bind_executor(_strand
+						, boost::bind(&Session::handleRead
+							, shared_from_this()
+							, boost::asio::placeholders::error
+							, boost::asio::placeholders::bytes_transferred)));
+			}
 
 			_socketStatus = SocketStatus::OPEN;
 
@@ -161,32 +231,62 @@ namespace mln::net
 		{
 			sendStream->setHeaderSize();
 
-			boost::asio::async_write(
-				_socket
-				, boost::asio::buffer(sendStream->data(), sendStream->size())
-				, boost::asio::bind_executor(_strand
-					, boost::bind(&Session::handleWrite
-						, shared_from_this()
-						, boost::asio::placeholders::error
-						, boost::asio::placeholders::bytes_transferred
-						, sendStream
-					))
-			);
+			if (SessionType::TCP == _sessionType) {
+				boost::asio::async_write(
+					socket()
+					, boost::asio::buffer(sendStream->data(), sendStream->size())
+					, boost::asio::bind_executor(_strand
+						, boost::bind(&Session::handleWrite
+							, shared_from_this()
+							, boost::asio::placeholders::error
+							, boost::asio::placeholders::bytes_transferred
+							, sendStream
+						))
+				);
+			}
+			else { // SesstionType::WEBSOCKET
+				websocket().async_write(
+					boost::asio::buffer(sendStream->data(), sendStream->size())
+					, _strand.wrap(
+						boost::bind(&Session::handleWrite
+							, shared_from_this()
+							, boost::asio::placeholders::error
+							, boost::asio::placeholders::bytes_transferred
+							, sendStream
+						))
+				);
+			}
+			
 		}
 
 		void sendFixedBuffer(std::span<unsigned char> sendBuffer)
 		{
-			boost::asio::async_write(
-				_socket
-				, boost::asio::buffer(sendBuffer.data(), sendBuffer.size())
-				, boost::asio::bind_executor(_strand
-					, boost::bind(&Session::handleWrite
-						, shared_from_this()
-						, boost::asio::placeholders::error
-						, boost::asio::placeholders::bytes_transferred
-						, std::nullopt
-					))
-			);
+			if (SessionType::TCP == _sessionType) {
+				boost::asio::async_write(
+					socket()
+					, boost::asio::buffer(sendBuffer.data(), sendBuffer.size())
+					, boost::asio::bind_executor(_strand
+						, boost::bind(&Session::handleWrite
+							, shared_from_this()
+							, boost::asio::placeholders::error
+							, boost::asio::placeholders::bytes_transferred
+							, std::nullopt
+						))
+				);
+			}
+			else {
+				websocket().async_write(
+					boost::asio::buffer(sendBuffer.data(), sendBuffer.size())
+					, _strand.wrap(
+						boost::bind(&Session::handleWrite
+							, shared_from_this()
+							, boost::asio::placeholders::error
+							, boost::asio::placeholders::bytes_transferred
+							, std::nullopt
+						))
+				);
+			}
+			
 		}
 
 		void sendByteStream(void* sendBuffer, const size_t sendSize, const bool writeHeader) {
@@ -202,17 +302,18 @@ namespace mln::net
 		void onExpired(const boost::system::error_code& ec) {
 			if (!ec) {
 				if (SocketStatus::OPEN == _socketStatus) {
-					//[[likely]]
+					[[likely]]
 					if (_eventReceiver) {
 						_eventReceiver->onExpiredSession(shared_from_this());
 					}
 				}
 				else {
-					//[[unlikely]]
+					[[unlikely]]
 					LOGW("socket status not OPEN");
 				}
 			}
 			else {
+				[[unlikely]]
 				if (ec != boost::asio::error::operation_aborted) {
 					LOGW("error in onExpired(). msg:{}", ec.message());
 				}
@@ -223,7 +324,16 @@ namespace mln::net
 			
 			if (!ec) {
 				//fmt::print("recv data. size:{}\n", bytes_transferred);
-				_recvStream->write(_recvBuffer, bytes_transferred);
+
+				if (SessionType::TCP == _sessionType) {
+					_recvStream->write(_recvBuffer, bytes_transferred);
+				}
+				else {
+					_recvStream->write((unsigned char*)_recvBufferWeb.data().data(), bytes_transferred);
+					unsigned char nullChar = NULL;
+					_recvStream->write(&nullChar, sizeof(nullChar));
+					_recvBufferWeb.consume(_recvBufferWeb.size());
+				}
 
 				incReadHandlerPendingCount();
 
@@ -232,13 +342,24 @@ namespace mln::net
 						, shared_from_this()
 						, _recvStream)));
 
-				_socket.async_read_some(
-					boost::asio::buffer(_recvBuffer, sizeof(_recvBuffer))
-					, boost::asio::bind_executor(_strand
-						, boost::bind(&Session::handleRead
-							, shared_from_this()
-							, boost::asio::placeholders::error
-							, boost::asio::placeholders::bytes_transferred)));
+				if (SessionType::TCP == _sessionType) {
+					socket().async_read_some(
+						boost::asio::buffer(_recvBuffer, sizeof(_recvBuffer))
+						, boost::asio::bind_executor(_strand
+							, boost::bind(&Session::handleRead
+								, shared_from_this()
+								, boost::asio::placeholders::error
+								, boost::asio::placeholders::bytes_transferred)));
+				}else{
+					websocket().async_read(
+						_recvBufferWeb
+						, boost::asio::bind_executor(_strand
+							, boost::bind(&Session::handleRead
+								, shared_from_this()
+								, boost::asio::placeholders::error
+								, boost::asio::placeholders::bytes_transferred)));
+
+				}
 
 				renewExpireTime();
 			}
@@ -265,6 +386,7 @@ namespace mln::net
 						, std::to_string(ec.value()), ec.message(), std::to_string(_readHandlerPending));
 				}
 
+				//LOGE("error in handleRead(). code:{}, msg:{}", ec.value(), ec.message());
 				tryCloseByFailed(boost::asio::ip::tcp::socket::shutdown_receive);
 			}//if (!ec) {
 		}
@@ -293,7 +415,9 @@ namespace mln::net
 
 		void tryCloseByFailed(boost::asio::socket_base::shutdown_type what) {
 			boost::system::error_code ec;
-			_socket.shutdown(what, ec);
+			if (SessionType::TCP == _sessionType) {
+				socket().shutdown(what, ec);
+			}
 
 			if (ec) {
 				LOGW("error in tryCloseByFailed(). msg:{}", ec.message());
@@ -307,18 +431,14 @@ namespace mln::net
 
 				boost::asio::post(
 					boost::asio::bind_executor(_strand
-						, boost::bind(&Session::onPreClose
+						, boost::bind(&Session::onClose
 							, shared_from_this())));
 			}
 		}
 
-		void onPreClose() {
-			boost::system::error_code ec;
-			_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+		void onClose() {
 
-			if (ec) {
-				LOGW("error in onPreClose(). status check : {}", ec.message());
-			}
+			boost::system::error_code ec;
 
 			if (SocketStatus::CLOSED != getSocketStatus()) {
 				setSocketStatus(SocketStatus::CLOSED);
@@ -327,7 +447,23 @@ namespace mln::net
 				_closeReserveTimer.cancel(ec);
 
 				_eventReceiver->onClose(shared_from_this());
+
+				if (SessionType::TCP == _sessionType) {
+					if (socket().is_open()) {
+						socket().shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+					}
+				}
+				else {
+					if (websocket().is_open()) {
+						websocket().close(boost::beast::websocket::close_code::normal, ec);
+					}
+				}
+
+				if (ec) {
+					LOGW("error in onClose(). status check : {}", ec.message());
+				}
 			}
+		
 		}
 
 		void closeReserve(const size_t timeAfterMs, std::function<void(void)> post = nullptr)
@@ -348,7 +484,7 @@ namespace mln::net
 			}
 
 			if (_socketStatus == SocketStatus::OPEN) {
-				onPreClose();
+				onClose();
 
 				if (post) {
 					post();
@@ -356,13 +492,9 @@ namespace mln::net
 			}
 		}
 
-		boost::asio::ip::tcp::endpoint getEndPoint() const {
-			return _socket.remote_endpoint();
-		}
-
 		std::tuple<std::string, uint16_t> getEndPointSocket() const {
-			return { _socket.remote_endpoint().address().to_string()
-				, _socket.remote_endpoint().port() };
+			return { _endPoint.address().to_string()
+				, _endPoint.port() };
 		}
 
 		void setServiceID(const size_t id) {_netServiceID = id;}
@@ -371,6 +503,9 @@ namespace mln::net
 
 		SessionIdType getIdentity() const {return _identity;}
 		EventReceiver* getEventReceiver() const {return _eventReceiver;}
+
+		void saveEndPoint() {_endPoint = socket().remote_endpoint();}
+		boost::asio::ip::tcp::endpoint getEndPoint() const {return _endPoint;}
 
 
 	protected:
@@ -387,8 +522,13 @@ namespace mln::net
 		SocketStatus _socketStatus;
 
 		boost::asio::io_context& _ioc;
+
 		boost::asio::ip::tcp::socket _socket;
+#ifdef MLN_USE_BEAST_WEBSOCKET
+		boost::beast::websocket::stream<boost::beast::tcp_stream> _socketWeb;
+#endif
 		boost::asio::io_context::strand _strand;
+		boost::asio::ip::tcp::endpoint _endPoint;
 
 		size_t _keepAliveTime = 0;
 		boost::asio::deadline_timer _keepAliveTimer;
@@ -398,6 +538,10 @@ namespace mln::net
 		size_t _postRetryCount = 0;
 		unsigned char _recvBuffer[RECV_BUFFER_SIZE];
 		ByteStream::sptr _recvStream;
+#ifdef MLN_USE_BEAST_WEBSOCKET
+		boost::beast::flat_buffer _recvBufferWeb;
+#endif
+
 
 		EventReceiver* _eventReceiver = nullptr;
 		DispatcherType _dispatchCallback;

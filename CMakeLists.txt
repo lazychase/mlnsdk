@@ -10,12 +10,15 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 INCLUDE (CheckIncludeFiles)
 include(ExternalProject)
 include(spdlog)
+include(struct-mapping)
 
 if(MSVC)
     add_definitions(/bigobj)
 endif(MSVC)
 
-include_directories(${SPDLOG_INCLUDE_DIR} 
+include_directories(
+    ${SPDLOG_INCLUDE_DIR} 
+    ${STRUCT_MAPPING_INCLUDE_DIR} 
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/include/
     ${CMAKE_SOURCE_DIR}/mlnserver/
@@ -24,4 +27,4 @@ include_directories(${SPDLOG_INCLUDE_DIR}
 
 
 add_subdirectory("mlnserver")
-add_dependencies(mlnserver spdlog)
+add_dependencies(mlnserver spdlog struct_mapping)

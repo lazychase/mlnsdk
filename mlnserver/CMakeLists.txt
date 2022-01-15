@@ -1,5 +1,22 @@
 ﻿find_package(cpprestsdk REQUIRED)
 
+if(NOT DEFINED MYSQL_INCLUDE_DIR)
+    if(WIN32)
+        set(MYSQL_CONN_ROOT "C:/local/mysql-connector-c++-8.0.25-winx64/")
+        set(MYSQL_CONN_INCLUDE_DIR "${MYSQL_CONN_ROOT}/include/")
+        set(MYSQL_CONN_LIB_DIR "${MYSQL_CONN_ROOT}/lib64/vs14/debug/")
+    else()
+        set(MYSQL_CONN_INCLUDE_DIR "/usr/include/mysql-cppconn-8")
+    endif()
+
+endif(NOT DEFINED MYSQL_INCLUDE_DIR)
+
+if(NOT DEFINED OPEN_SSL_BIN_DIR)
+    if(WIN32)
+        set(OPEN_SSL_BIN_DIR "C:/local/vcpkg/packages/openssl_x64-windows/debug/bin/")
+    endif()
+endif(NOT DEFINED OPEN_SSL_BIN_DIR)
+
 
 add_compile_definitions(BOOST_ASIO_HAS_MOVE)
 add_compile_definitions(BOOST_THREAD_PROVIDES_FUTURE)
@@ -7,6 +24,8 @@ add_compile_definitions(BOOST_THREAD_PROVIDES_FUTURE_UNWRAP)
 add_compile_definitions(BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION)
 
 add_compile_definitions(MLN_NET_USE_JSONPARSER_CPPREST)
+add_compile_definitions(MLN_USE_BEAST_WEBSOCKET)
+
 
 #ADD_DEFINITIONS(-DBoost_USE_STATIC_LIBS=ON)
 SET(Boost_ADDITIONAL_VERSIONS "1.78" "1.78.0")
@@ -31,11 +50,19 @@ if(Boost_FOUND)
     message(STATUS "Boost_LIBRARIES: ${Boost_LIBRARIES}")
     message(STATUS "---------------------")
 
-    include_directories(${Boost_INCLUDE_DIRS} 
+    include_directories(
+        ${MYSQL_CONN_INCLUDE_DIR}
+        ${Boost_INCLUDE_DIRS} 
         "${CMAKE_SOURCE_DIR}/mlnserver/"
         "${CMAKE_SOURCE_DIR}/include/"
     )
-    message("${CMAKE_SOURCE_DIR}/include/")
+
+if(WIN32)
+    link_directories(
+        ${MYSQL_CONN_LIB_DIR}
+        "C:\\Program Files (x86)\\aws-cpp-sdk-all\\bin"
+    )
+endif()
 
     add_executable(mlnserver
         main.cpp
@@ -43,6 +70,7 @@ if(Boost_FOUND)
     )
 
     target_link_libraries(mlnserver
+        mysqlcppconn8
         ${Boost_LIBRARIES}
         cpprestsdk::cpprest
     )

@@ -168,6 +168,7 @@ namespace mln::net {
 
 			auto endPoint = (*_iterEndPoint)->endpoint();
 			LOGD("Connected to {}/{}", endPoint.address().to_string(), endPoint.port());
+			session->saveEndPoint();
 
 			session->startConnect();
 			_netObj._eventReceiver.onConnect(session);
@@ -200,6 +201,7 @@ namespace mln::net {
 			auto endPoint = (iterEndpoint)->endpoint();
 			LOGD("Connected to {}/{}", endPoint.address().to_string(), endPoint.port());
 
+			session->saveEndPoint();
 			session->startConnect();
 
 			_netObj._eventReceiver.onConnect(session);
