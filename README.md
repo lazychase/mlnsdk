@@ -3,7 +3,7 @@ C++ 서버 프레임워크. header-only library.
 
 [mlnserver](https://github.com/lazychase/mlnserver) : Sample Server Project
 
-
+openssl
 
 
 # Required
@@ -28,14 +28,14 @@ C++ 서버 프레임워크. header-only library.
 
 
 ### cpprestsdk
-json 라이브러리의 선택은 언제나 고민입니다. 압도적으로 빠른 [simdjson](https://github.com/simdjson/simdjson) 이 있지만 simdjson 은 읽기 기능만 되고 json 문자열을 생성하는 기능은 제공하지 않기 때문에 선택에서 제외하였습니다.
+압도적으로 빠른 [simdjson](https://github.com/simdjson/simdjson) 이 있지만 simdjson 은 읽기 기능만 되고 json 문자열을 생성하는 기능은 제공하지 않기 때문에 선택에서 제외하였습니다.
 
 json 파서의 종류는 cmake 의 컴파일 옵션을 수정하여 다른 json 라이브러리를 선택하는것도 가능합니다. 하지만 cpprestsdk 에 포함된 병렬프로세스 라이브러리인 ppltask 를 비동기 호출수단으로 사용할 것이기 때문에 cpprestsdk 는 필요합니다.
 
 
 # Dependancies
 * [spdlog](https://github.com/gabime/spdlog)  
-  
+* [struct_mapping](https://github.com/bk192077/struct_mapping)  
   
 
 ## 빠르게 서버 개발을 시작하기 위해서
@@ -50,3 +50,8 @@ json 문자열을 기반으로 패킷을 추가할 수 있도록 패킷 프로토콜과 파서가 준비되어 �
 
 ## 교체가 가능한 Json 라이브러리
 기본 제공하는 PacketJsonHandler 에서는 Json 타입을 템플릿 파라미터로 사용하고 있어서 사용자가 파상함수를 제공하여 원하는 라이브러리로 교체사용이 가능합니다.
+
+## 웹소켓 지원(작성중)
+한개의 서비스(서버)에서 TCP 소켓 클라이언트와 웹소켓 클라이언트를 동등한 세션으로 처리할 수 있습니다. 
+* 웹소켓 세션을 바이너리 모드로 생성 중 => (TODO) 문자열 기반 세션으로 변경
+* (TODO) 기본 프로토콜 및 파서에 대응하는 웹소켓세션용 파서 제작
