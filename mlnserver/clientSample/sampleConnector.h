@@ -109,7 +109,7 @@ namespace mlnserver {
 				, connectorUserParam
 			);
 
-			svc->_connectorTcp->connectWait(
+			svc->_connector->connectWait(
 				1	// session count
 				, 0	// 
 			);
@@ -130,7 +130,7 @@ namespace mlnserver {
 				, port
 			);
 
-			svc->_connectorTcp->connectWait(
+			svc->_connector->connectWait(
 				1	// session count
 				, 0	// 
 			);

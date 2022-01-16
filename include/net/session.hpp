@@ -52,6 +52,9 @@ namespace mln::net
 		static const int RECV_BUFFER_SIZE = 8192;
 		static const size_t HANDLE_READ_RETRY_MAX = 5;
 
+	private:
+		inline static std::atomic< size_t > s_identitySeed = { 1 };
+
 	public:
 
 		Session(const SessionType sessionType, boost::asio::io_context& ioc)
@@ -65,6 +68,8 @@ namespace mln::net
 			, _keepAliveTimer(ioc)
 			, _closeReserveTimer(ioc)
 		{
+			_identity = s_identitySeed.fetch_add(1, std::memory_order_relaxed);
+
 			_socketWeb.binary(true);
 		}
 
@@ -89,6 +94,8 @@ namespace mln::net
 			, _eventReceiver(evntReceiver)
 			/*, _connectionID(connectionID)*/
 		{
+			_identity = s_identitySeed.fetch_add(1, std::memory_order_relaxed);
+
 			_socketWeb.binary(true);
 		}
 

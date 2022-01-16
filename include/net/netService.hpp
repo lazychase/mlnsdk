@@ -55,12 +55,6 @@ namespace mln::net {
 		std::shared_ptr< NetServiceAcceptor > _accepter;
 		std::shared_ptr< NetServiceConnector > _connector;
 
-	protected:
-		inline static std::atomic< size_t > s_identitySeed = { 1 };
-
-
-
-
 	public:
 		static size_t addWorkerThreads(const size_t workerCount
 			, std::optional< boost::asio::io_context* > optIoc = std::nullopt
