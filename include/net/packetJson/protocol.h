@@ -40,10 +40,10 @@ namespace mln::net {
 			int8_t		url[MAX_URL_STRING];
 			uint16_t	bodySize = 0;
 #pragma endregion
-			int8_t		jsonBody[MAX_BODY_SIZE];
+			int8_t		body[MAX_BODY_SIZE];
 
 			PT_JSON() {
-				static_assert(HEADER_SIZE == sizeof(PT_JSON) - sizeof(jsonBody)
+				static_assert(HEADER_SIZE == sizeof(PT_JSON) - sizeof(body)
 					, "check header-size");
 
 				MLN_NET_PACKET_JSON_CODE_VALUE_MACRO;
@@ -59,6 +59,10 @@ namespace mln::net {
 			PT_HEARTBEAT() {
 				MLN_NET_PACKET_JSON_CODE_VALUE_MACRO;
 			}
+		};
+
+		struct PT_JSON_FOR_WEBSOCKET {
+			enum { packet_value = 5 };
 		};
 
 	};// namespace packetJson

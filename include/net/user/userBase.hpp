@@ -23,6 +23,7 @@ namespace mln::net {
 
 		UserBase(Session::sptr session) {
 			_session = session;
+			_sessionType = session->_sessionType;
 		}
 		virtual ~UserBase() = default;
 
@@ -85,7 +86,6 @@ namespace mln::net {
 		}
 
 		int sendJsonPacket(const std::string& url, std::string& body) {
-
 			static uint32_t packetSeqNum = 0;
 			++packetSeqNum;
 
@@ -96,12 +96,20 @@ namespace mln::net {
 			packet.sequenceNo = -1;
 			packet.isCompressed = false;
 
-			memcpy(packet.jsonBody, body.c_str(), body.length());
+			memcpy(packet.body, body.c_str(), body.length());
 
 			return send((unsigned char*)&packet
 				, packetJson::PT_JSON::HEADER_SIZE + packet.bodySize
 				, false // PT_JSON packet is designed to include header information.
 			);
+		}
+
+		int sendJsonWebsocketPacket(const std::string& payload) {
+			if (auto session = _session.lock(); session) {
+				session->sendRaw((unsigned char*)payload.data(), payload.size());
+				return payload.size();
+			}
+			return false;
 		}
 
 		virtual UserIdType getUserId() const {return _userId;}
@@ -112,6 +120,7 @@ namespace mln::net {
 	public:
 		UserIdType _userId = 0;
 
+		SessionType _sessionType;
 		Session::wptr _session;
 		bool m_connected = false;
 

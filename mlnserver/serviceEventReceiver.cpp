@@ -78,15 +78,36 @@ void ServiceEventReceiver::initHandler(PacketProcedure* packetProcedure)
 		) {
 
 		assert(url == "/lobby/login");
+		auto sessionOpt = userBase->getSession();
+		std::string sessionTypeString;
+		if (sessionOpt.has_value()) {
+			sessionTypeString = sessionOpt.value()->getSessionTypeString();
+		}
 
-		LOGD("received packet from client. (C->S) url:{}", url);
+		LOGD("received packet from client. (C->S) url:{}, sessionType:{}"
+			, url
+			, sessionTypeString
+		);
+
 		auto receivedJsonString = jv.serialize();
 		std::cout << CONV_UTF8(receivedJsonString) << std::endl;
 
-
 		auto user = std::static_pointer_cast<User>(userBase);
 		std::string replyString(receivedJsonString.begin(), receivedJsonString.end());
-		user->sendJsonPacket(url, replyString);
+
+		if (SessionType::TCP == user->_sessionType) {
+			user->sendJsonPacket(url, replyString);
+		}
+		else {
+			auto obj = web::json::value::object();
+			obj[U("url")] = web::json::value::string(utility::conversions::to_string_t(url));
+			obj[U("body")] = web::json::value::string(receivedJsonString);
+			std::ostringstream oss;
+			obj.serialize(oss);
+			user->sendJsonWebsocketPacket(oss.str().data());
+		}
+		
+		
 	});
 
 }

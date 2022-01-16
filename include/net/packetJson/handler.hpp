@@ -19,7 +19,7 @@ namespace mln::net {
 		using TyJsonValue = JSON_VALUE_TYPE;
 
 		using JsonParsingCallback = std::function<
-			std::tuple<bool, JSON_VALUE_TYPE>(unsigned char* body, uint32_t bodySize)
+			std::tuple<bool, JSON_VALUE_TYPE, std::string>(unsigned char* body, uint32_t bodySize, bool getUrl)
 		>;
 
 		using JsonPacketHandlerType = std::function<
@@ -38,6 +38,17 @@ namespace mln::net {
 					, std::placeholders::_3
 				)
 				);
+
+			packetProcedure->registPacket(
+				packetJson::PT_JSON_FOR_WEBSOCKET::packet_value
+				, std::bind(&PacketJsonHandler::readJsonWebsocketPacket
+					, this
+					, std::placeholders::_1
+					, std::placeholders::_2
+					, std::placeholders::_3
+				)
+			);
+			
 		}
 
 		bool readJsonPacket(Session::sptr session, uint32_t size, ByteStream& stream) {
@@ -63,14 +74,14 @@ namespace mln::net {
 			}
 
 			try {
-				stream.read((unsigned char*)req.jsonBody, req.bodySize);
+				stream.read((unsigned char*)req.body, req.bodySize);
 			}
 			catch (std::exception& e) {
 				errorLog("body pop error");
 				return false;
 			}
 
-			auto [result, jv] = _jsonParsingCallback((unsigned char*)&(req.jsonBody), req.bodySize);
+			auto [result, jv, _] = _jsonParsingCallback((unsigned char*)&(req.body), req.bodySize, false);
 			if (false == result) {
 				errorLog("invalid json string");
 				return false;
@@ -82,7 +93,21 @@ namespace mln::net {
 			dispatch(session, urlString, jv);
 
 			return true;
+		}
 
+		bool readJsonWebsocketPacket(Session::sptr session, uint32_t size, ByteStream& stream) {
+			
+			auto [result, jv, urlString] = _jsonParsingCallback(stream.data(), stream.size(), true);
+			if (false == result) {
+				auto [addr, port] = session->getEndPointSocket();
+				LOGE("{}. remote:({}/{}).", "invalid json string", addr, port);
+				session->closeReserve(0);
+				return false;
+			}
+
+			dispatch(session, urlString, jv);
+
+			return true;
 		}
 
 		void dispatch(Session::sptr session, const std::string& url, JSON_VALUE_TYPE& jv) {

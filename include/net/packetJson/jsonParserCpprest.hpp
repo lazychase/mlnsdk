@@ -6,14 +6,20 @@
 
 
 namespace mln::net::cpprest {
-	static std::tuple<bool, web::json::value> parse(unsigned char* body, uint32_t bodySize) {
+	static std::tuple<bool, web::json::value, std::string> parse(unsigned char* body, uint32_t bodySize, bool getUrlString) {
 
 		try {
-			std::string myJsonString((char*)body, bodySize);
-			return { true, web::json::value::parse(myJsonString) };
+			if (!getUrlString) {
+				return { true, web::json::value::parse({(char*)body, bodySize}), "" };
+			}
+			else {
+				auto bodyString = web::json::value::parse({(char*)body, bodySize});
+				return { true, bodyString[U("body")], utility::conversions::to_utf8string(bodyString[U("url")].as_string()) };
+			}
 		}
 		catch (std::exception e) {
-			return { false, web::json::value::null() };
+			std::cout << "failed parse(). msg:" << e.what() << std::endl;
+			return { false, web::json::value::null(), ""};
 		}
 	}
 }//namespace mln::net::mlncpprest {

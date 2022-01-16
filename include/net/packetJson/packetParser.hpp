@@ -36,35 +36,43 @@ namespace mln::net {
 			, PacketProcedure::PacketMapTy& memberFuncMap
 			, PacketProcedure::PacketMapTy& staticFuncMap
 		){
-			packetJson::HEADER header;
 
-			do {
-				if (false == stream->tryRead((unsigned char*)&header, sizeof(header))) {
-					break;
-				}
+			if (SessionType::TCP == session->_sessionType) {
+				
+				packetJson::HEADER header;
 
-				if (header.size < 0 || header.size > USHRT_MAX) {
-					return false;
-				}
+				do {
+					if (false == stream->tryRead((unsigned char*)&header, sizeof(header))) {
+						break;
+					}
 
-				if (header.size > stream->size()) {
-					break;
-				}
+					if (header.size < 0 || header.size > USHRT_MAX) {
+						return false;
+					}
 
-				auto packet = std::make_shared<ByteStream>();
-				packet->write((unsigned char*)(stream->data()), header.size);
-				stream->advancePosRead(header.size);
+					if (header.size > stream->size()) {
+						break;
+					}
 
-				if (auto it = staticFuncMap.find(header.code); staticFuncMap.end() != it) {
-					it->second(session, header.size, *packet.get());
-				}
-				else {
-					session->getEventReceiver()->noHandler(session, *packet.get());
-					packet->clear();
-					return false;
-				}
+					auto packet = std::make_shared<ByteStream>();
+					packet->write((unsigned char*)(stream->data()), header.size);
+					stream->advancePosRead(header.size);
 
-			} while (true);
+					if (auto it = staticFuncMap.find(header.code); staticFuncMap.end() != it) {
+						it->second(session, header.size, *packet.get());
+					}
+					else {
+						session->getEventReceiver()->noHandler(session, *packet.get());
+						packet->clear();
+						return false;
+					}
+
+				} while (true);
+
+			}
+			else {
+				staticFuncMap[packetJson::PT_JSON_FOR_WEBSOCKET::packet_value](session, stream->size(), *stream.get());
+			}
 
 			return true;
 		}

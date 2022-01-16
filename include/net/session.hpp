@@ -70,7 +70,7 @@ namespace mln::net
 		{
 			_identity = s_identitySeed.fetch_add(1, std::memory_order_relaxed);
 
-			_socketWeb.binary(true);
+			//_socketWeb.binary(true);
 		}
 
 		Session(const SessionType sessionType, boost::asio::io_context& ioc
@@ -96,7 +96,7 @@ namespace mln::net
 		{
 			_identity = s_identitySeed.fetch_add(1, std::memory_order_relaxed);
 
-			_socketWeb.binary(true);
+			//_socketWeb.binary(true);
 		}
 
 		static sptr create(const SessionType sessionType
@@ -296,6 +296,40 @@ namespace mln::net
 			
 		}
 
+		void sendRaw(unsigned char *data, const unsigned size) {
+			ByteStream::sptr sendStream = ByteStream::sptr(
+				new ByteStream(), ByteStream::destruct
+			);
+			sendStream->write(data, size);
+
+			if (SessionType::TCP == _sessionType) {
+				boost::asio::async_write(
+					socket()
+					, boost::asio::buffer(sendStream->data(), sendStream->size())
+					, boost::asio::bind_executor(_strand
+						, boost::bind(&Session::handleWrite
+							, shared_from_this()
+							, boost::asio::placeholders::error
+							, boost::asio::placeholders::bytes_transferred
+							, sendStream
+						))
+				);
+			}
+			else {
+				websocket().async_write(
+					boost::asio::buffer(sendStream->data(), sendStream->size())
+					, _strand.wrap(
+						boost::bind(&Session::handleWrite
+							, shared_from_this()
+							, boost::asio::placeholders::error
+							, boost::asio::placeholders::bytes_transferred
+							, sendStream
+						))
+				);
+			}
+
+		}
+
 		void sendByteStream(void* sendBuffer, const size_t sendSize, const bool writeHeader) {
 			ByteStream::sptr sendStream = ByteStream::sptr(
 				new ByteStream(_packetManipulator, writeHeader)
@@ -336,9 +370,11 @@ namespace mln::net
 					_recvStream->write(_recvBuffer, bytes_transferred);
 				}
 				else {
+					/*ws_.text(ws_.got_text());*/
+
 					_recvStream->write((unsigned char*)_recvBufferWeb.data().data(), bytes_transferred);
-					unsigned char nullChar = NULL;
-					_recvStream->write(&nullChar, sizeof(nullChar));
+					/*unsigned char nullChar = NULL;
+					_recvStream->write(&nullChar, sizeof(nullChar));*/
 					_recvBufferWeb.consume(_recvBufferWeb.size());
 				}
 
@@ -513,6 +549,11 @@ namespace mln::net
 
 		void saveEndPoint() {_endPoint = socket().remote_endpoint();}
 		boost::asio::ip::tcp::endpoint getEndPoint() const {return _endPoint;}
+
+		std::string getSessionTypeString() const {
+			return SessionType::TCP == _sessionType ? "TCP" : "WEBSOCKET";
+		}
+			
 
 
 	protected:
