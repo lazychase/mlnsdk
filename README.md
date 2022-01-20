@@ -24,13 +24,15 @@ openssl
 ```
 
 ### Boost
-예전 버젼(minimum 1.72)도 현재는 가능합니다. 
+1.78 버젼을 기준으로 작성되고 있습니다. 
 
 
 ### cpprestsdk
-압도적으로 빠른 [simdjson](https://github.com/simdjson/simdjson) 이 있지만 simdjson 은 읽기 기능만 되고 json 문자열을 생성하는 기능은 제공하지 않기 때문에 선택에서 제외하였습니다.
+압도적으로 빠른 [simdjson](https://github.com/simdjson/simdjson) 이 있지만 simdjson 은 읽기 기능만 되고 json 문자열을 생성하는 기능은 제공하지 않기 때문에 선택에서 제외하였습니다.텍스트 마이닝 등으로 대량의 json 문자열 파싱이 필요할 경우에는 simdjson 연동이 추가될 수 있습니다.
 
-json 파서의 종류는 cmake 의 컴파일 옵션을 수정하여 다른 json 라이브러리를 선택하는것도 가능합니다. 하지만 cpprestsdk 에 포함된 병렬프로세스 라이브러리인 ppltask 를 비동기 호출수단으로 사용할 것이기 때문에 cpprestsdk 는 필요합니다.
+~~json 파서의 종류는 cmake 의 컴파일 옵션을 수정하여 다른 json 라이브러리를 선택하는것도 가능합니다. 하지만 cpprestsdk 에 포함된 병렬프로세스 라이브러리인 ppltask 를 비동기 호출수단으로 사용할 것이기 때문에 cpprestsdk 는 필요합니다.~~  
+
+boost 1.75 버젼 부터 json 라이브러리가 추가되었습니다. ptree 를 사용했던 기존의 json 파싱작업은 속도가 매우 느린편이었는데, [추가된 json 라이브러리는 rapid json 에 밀리지 않는 성능을 보여줍니다.](https://www.boost.org/doc/libs/1_75_0/libs/json/doc/html/json/benchmarks.html)
 
 
 # Dependancies
@@ -53,3 +55,6 @@ json 문자열을 기반으로 패킷을 추가할 수 있도록 패킷 프로토콜과 파서가 준비되어 �
 
 ## 웹소켓 지원
 한개의 서비스(서버)에서 TCP 소켓 클라이언트와 웹소켓 클라이언트를 동등한 세션으로 처리할 수 있습니다. 
+
+## Doing
+기본 json 라이브러리를 boost json 으로 교체중
