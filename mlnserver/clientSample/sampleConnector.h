@@ -9,17 +9,10 @@
 #include <net/packetJson/handler.hpp>
 #include "../user.h"
 
-#include <cpprest/http_client.h>
-
-#ifndef CONV_UTF8
-#ifdef WIN32
-#define CONV_UTF8(msg) utility::conversions::to_utf8string(msg)
-#define CONV_STRT(msg) utility::conversions::to_string_t(msg)
-#else
-#define CONV_UTF8(msg)  msg
-#define CONV_STRT(msg)  msg
+#if defined (MLN_NET_USE_JSONPARSER_BOOSTJSON)
+#include <boost/json.hpp>
+#include <iostream>
 #endif
-#endif//#ifndef CONV_UTF8
 
 namespace mlnserver {
 
@@ -67,20 +60,22 @@ namespace mlnserver {
 		void initHandler(mln::net::PacketProcedure* packetProcedure) {
 			using namespace mln::net;
 
-			auto static handler = PacketJsonHandler<web::json::value>();
+#if defined (MLN_NET_USE_JSONPARSER_BOOSTJSON)
+			auto static handler = PacketJsonHandler<boost::json::value>();
 
 			handler.init(packetProcedure);
-			handler.setJsonBodyParser(mln::net::cpprest::parse);
+			handler.setJsonBodyParser(mln::net::boostjson::parse);
 			handler.registJsonPacketHandler("/lobby/login", [](
 				UserBase::sptr user
 				, const std::string& url
 				, auto& jv
 				) {
-				assert(url == "/lobby/login");
+					assert(url == "/lobby/login");
 
-				LOGD("received packet from server. (S->C) url:{}", url);
-				std::cout << CONV_UTF8(jv.serialize()) << std::endl;
-			});
+					LOGD("received packet from server. (S->C) url:{}", url);
+					std::cout << boost::json::serialize(jv) << std::endl;
+				});
+#endif
 		}
 
 		static void tryConnect1(boost::asio::io_context& ioc, const uint16_t port)
