@@ -23,7 +23,7 @@ add_compile_definitions(BOOST_THREAD_PROVIDES_FUTURE)
 add_compile_definitions(BOOST_THREAD_PROVIDES_FUTURE_UNWRAP)
 add_compile_definitions(BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION)
 
-add_compile_definitions(MLN_NET_USE_JSONPARSER_CPPREST)
+add_compile_definitions(MLN_NET_USE_JSONPARSER_BOOSTJSON)
 add_compile_definitions(MLN_USE_BEAST_WEBSOCKET)
 
 
@@ -32,7 +32,7 @@ SET(Boost_ADDITIONAL_VERSIONS "1.78" "1.78.0")
 
 if(WIN32)
     SET(Boost_ROOT "C:\\local\\boost_1_78_0")
-    SET(Boost_LIBRARY_DIR "${Boost_ROOT}\\lib64-msvc-14.2")
+    SET(Boost_LIBRARY_DIR "${Boost_ROOT}\\lib64-msvc-14.3")
     SET(Boost_INCLUDE_DIR ${Boost_ROOT})
     SET(Boost_USE_STATIC_LIBS        ON)  # only find static libs
 endif()
@@ -41,7 +41,7 @@ endif()
 set(Boost_USE_MULTITHREADED      ON)
 # set(Boost_USE_STATIC_RUNTIME    OFF)
 
-find_package(Boost REQUIRED system date_time thread chrono)
+find_package(Boost REQUIRED system date_time thread chrono json)
 if(Boost_FOUND)
     message(STATUS "---------------------")
     message(STATUS "Boost_FOUND: ${Boost_FOUND}")
@@ -70,7 +70,7 @@ endif()
     )
 
     target_link_libraries(mlnserver
-        mysqlcppconn8
+        #mysqlcppconn8
         ${Boost_LIBRARIES}
         cpprestsdk::cpprest
     )
