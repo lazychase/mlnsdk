@@ -7,15 +7,9 @@
 using namespace mlnserver;
 using namespace mln::net;
 
-#ifndef CONV_UTF8
-#ifdef WIN32
-#define CONV_UTF8(msg) utility::conversions::to_utf8string(msg)
-#define CONV_STRT(msg) utility::conversions::to_string_t(msg)
-#else
-#define CONV_UTF8(msg)  msg
-#define CONV_STRT(msg)  msg
-#endif
-#endif//#ifndef CONV_UTF8
+#if defined (MLN_NET_USE_JSONPARSER_BOOSTJSON)
+#include <boost/json.hpp>
+#endif//#if defined (MLN_NET_USE_JSONPARSER_BOOSTJSON)
 
 void ServiceEventReceiver::onAccept(Session::sptr session)
 {
@@ -65,49 +59,44 @@ void ServiceEventReceiver::initHandler(PacketProcedure* packetProcedure)
 {
 	using namespace mln::net;
 
-	// packetJson::PT_JSON ∆–≈∂¿ª µÓ∑œ.
-	auto static handler = PacketJsonHandler<web::json::value>();
+	// packetJson::PT_JSON Ìå®ÌÇ∑ÏùÑ Îì±Î°ù.
+	auto static handler = PacketJsonHandler<boost::json::value>();
 	handler.init(packetProcedure);
-	handler.setJsonBodyParser(mln::net::cpprest::parse);
+	handler.setJsonBodyParser(mln::net::boostjson::parse);
 
-	// º≠∫Í∆–≈∂µÈ(json packets)¿ª µÓ∑œ
+	// ÏÑúÎ∏åÌå®ÌÇ∑Îì§(json packets)ÏùÑ Îì±Î°ù
 	handler.registJsonPacketHandler("/lobby/login", [](
 		UserBase::sptr userBase
 		, const std::string& url
-		, auto & jv
+		, auto& jv
 		) {
 
-		assert(url == "/lobby/login");
-		auto sessionOpt = userBase->getSession();
-		std::string sessionTypeString;
-		if (sessionOpt.has_value()) {
-			sessionTypeString = sessionOpt.value()->getSessionTypeString();
-		}
+			assert(url == "/lobby/login");
+			auto sessionOpt = userBase->getSession();
+			std::string sessionTypeString;
+			if (sessionOpt.has_value()) {
+				sessionTypeString = sessionOpt.value()->getSessionTypeString();
+			}
 
-		LOGD("received packet from client. (C->S) url:{}, sessionType:{}"
-			, url
-			, sessionTypeString
-		);
+			LOGD("received packet from client. (C->S) url:{}, sessionType:{}"
+				, url
+				, sessionTypeString
+			);
 
-		auto receivedJsonString = jv.serialize();
-		std::cout << CONV_UTF8(receivedJsonString) << std::endl;
+			auto receivedJsonString = boost::json::serialize(jv);
+			std::cout << receivedJsonString << std::endl;
 
-		auto user = std::static_pointer_cast<User>(userBase);
-		std::string replyString(receivedJsonString.begin(), receivedJsonString.end());
+			auto user = std::static_pointer_cast<User>(userBase);
+			std::string replyString(receivedJsonString.begin(), receivedJsonString.end());
 
-		if (SessionType::TCP == user->_sessionType) {
-			user->sendJsonPacket(url, replyString);
-		}
-		else {
-			auto obj = web::json::value::object();
-			obj[U("url")] = web::json::value::string(utility::conversions::to_string_t(url));
-			obj[U("body")] = web::json::value::string(receivedJsonString);
-			std::ostringstream oss;
-			obj.serialize(oss);
-			user->sendJsonWebsocketPacket(oss.str().data());
-		}
-		
-		
-	});
-
+			if (SessionType::TCP == user->_sessionType) {
+				user->sendJsonPacket(url, replyString);
+			}
+			else {
+				auto obj = boost::json::object();
+				obj["url"] = url;
+				obj["body"] = receivedJsonString;
+				user->sendJsonWebsocketPacket(boost::json::serialize(obj));
+			}
+		});
 }
