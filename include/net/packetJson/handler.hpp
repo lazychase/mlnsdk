@@ -6,9 +6,10 @@
 
 #include "../packetProcedure.hpp"
 
-#if defined (MLN_NET_USE_JSONPARSER_CPPREST)
-#include "jsonParserCpprest.hpp"
+#if defined (MLN_NET_USE_JSONPARSER_BOOSTJSON)
+#include "jsonParserBoostjson.hpp"
 #endif
+
 
 namespace mln::net {
 
