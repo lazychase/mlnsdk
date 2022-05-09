@@ -3,6 +3,7 @@
 #include <type_traits>
 #include <cassert>
 #include <cstdint>
+#include <cstring>
 
 #pragma warning( push )
 #pragma warning( disable : 4351 )
