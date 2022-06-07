@@ -101,6 +101,11 @@ namespace mln::net {
 			checkAdvanceReadBuffer(bytes);
 
 			_posRead += bytes;
+			
+			if (_posRead == _posWrite) {
+				clear();
+			}
+			
 			return *this;
 		}
 
