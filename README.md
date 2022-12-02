@@ -11,6 +11,7 @@ openssl
   * msvc : visual studio 2019 16.11 이상
   * linux : gcc11
 * CMake [>=3.12 <= 3.18]
+  * [cmake 3.18 release](https://github.com/Kitware/CMake/releases/tag/v3.18.6)
 * Boost 1.78
 * Boost Json
 * openSSL
@@ -30,6 +31,9 @@ openssl
 ### Boost Json
 boost 1.75 버젼 부터 json 라이브러리가 추가되었습니다. ptree 를 사용했던 기존의 json 파싱작업은 속도가 매우 느린편이었는데, [추가된 json 라이브러리는 rapid json 에 밀리지 않는 성능을 보여줍니다.](https://www.boost.org/doc/libs/1_75_0/libs/json/doc/html/json/benchmarks.html)
 
+# Windows
+## vcpkg
+* https://github.com/microsoft/vcpkg
 
 # Dependancies
 * [spdlog](https://github.com/gabime/spdlog)  
