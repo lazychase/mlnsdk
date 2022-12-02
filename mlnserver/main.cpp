@@ -1,5 +1,6 @@
 ﻿#include <net/session.hpp>
 #include <net/logger.hpp>
+#include <net/http/httpServer.hpp>
 
 #ifdef _WIN32
 #include <net/exceptionHandler.hpp>
@@ -15,6 +16,7 @@
 
 
 bool ioServiceThread();
+void testHttpServer();
 
 int main(int argc, char* argv[])
 {
@@ -32,6 +34,9 @@ int main(int argc, char* argv[])
 		LOGE("SetConsoleTitle failed {}", GetLastError());
 	}
 #endif
+
+	testHttpServer();
+
 
 	return ioServiceThread();
 }
@@ -98,4 +103,19 @@ bool ioServiceThread()
 
 	}, g_ioc.get());
 	return true;
+}
+
+
+#define HTTP_SERVER_REGISTER_URL(url) mln::net::HttpServer::instance().GetRegisterFunc(url)
+
+void testHttpServer()
+{
+	HTTP_SERVER_REGISTER_URL("/test")
+		([](mln::net::HttpServer::HeaderMap&& header, std::string&& body, mln::net::HttpServer::SendFunc& send) {
+		return send("{\"user\": \"testUser\"}");
+			});
+
+
+	mln::net::HttpServer::instance().startAsync(28888, g_ioc);
+
 }
