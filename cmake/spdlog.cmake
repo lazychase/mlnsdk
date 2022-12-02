@@ -4,7 +4,7 @@ ExternalProject_Add(
     spdlog
     PREFIX ${CMAKE_BINARY_DIR}/vendor/spdlog
     GIT_REPOSITORY "https://github.com/gabime/spdlog.git"
-    GIT_TAG "v1.9.2"
+    GIT_TAG "v1.11.0"
     TIMEOUT 10
     CONFIGURE_COMMAND ""
     #CMAKE_ARGS "-DSPDLOG_FMT_EXTERNAL_HO=ON"

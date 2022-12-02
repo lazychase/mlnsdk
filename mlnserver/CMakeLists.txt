@@ -1,6 +1,4 @@
-﻿find_package(cpprestsdk REQUIRED)
-
-if(NOT DEFINED MYSQL_INCLUDE_DIR)
+﻿if(NOT DEFINED MYSQL_INCLUDE_DIR)
     if(WIN32)
         set(MYSQL_CONN_ROOT "C:/local/mysql-connector-c++-8.0.25-winx64/")
         set(MYSQL_CONN_INCLUDE_DIR "${MYSQL_CONN_ROOT}/include/")
@@ -28,20 +26,20 @@ add_compile_definitions(MLN_USE_BEAST_WEBSOCKET)
 
 
 #ADD_DEFINITIONS(-DBoost_USE_STATIC_LIBS=ON)
-SET(Boost_ADDITIONAL_VERSIONS "1.78" "1.78.0")
+#SET(Boost_ADDITIONAL_VERSIONS "1.78" "1.78.0")
 
 if(WIN32)
-    SET(Boost_ROOT "C:\\local\\boost_1_78_0")
-    SET(Boost_LIBRARY_DIR "${Boost_ROOT}\\lib64-msvc-14.3")
-    SET(Boost_INCLUDE_DIR ${Boost_ROOT})
-    SET(Boost_USE_STATIC_LIBS        ON)  # only find static libs
+    #SET(Boost_ROOT "C:\\local\\boost_1_78_0")
+    #SET(Boost_LIBRARY_DIR "${Boost_ROOT}\\lib64-msvc-14.3")
+    #SET(Boost_INCLUDE_DIR ${Boost_ROOT})
+    #SET(Boost_USE_STATIC_LIBS        ON)  # only find static libs
 endif()
 # set(Boost_USE_DEBUG_LIBS         OFF) # ignore debug libs and
 # set(Boost_USE_RELEASE_LIBS       ON)  # only find release libs
 set(Boost_USE_MULTITHREADED      ON)
 # set(Boost_USE_STATIC_RUNTIME    OFF)
 
-find_package(Boost REQUIRED system date_time thread chrono json)
+find_package(Boost 1.80 REQUIRED system date_time thread chrono json)
 if(Boost_FOUND)
     message(STATUS "---------------------")
     message(STATUS "Boost_FOUND: ${Boost_FOUND}")
@@ -72,7 +70,6 @@ endif()
     target_link_libraries(mlnserver
         #mysqlcppconn8
         ${Boost_LIBRARIES}
-        cpprestsdk::cpprest
     )
     
     file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/netconfig.json

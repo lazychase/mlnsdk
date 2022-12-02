@@ -16,6 +16,7 @@ include(struct-mapping)
 if(MSVC)
     add_definitions(/bigobj)
     add_definitions(-D_WIN32_WINNT=0x0601)
+    ADD_DEFINITIONS(-DCMAKE_TOOLCHAIN_FILE=C:/local/vcpkg/scripts/buildsystems/vcpkg.cmake)
 endif(MSVC)
 
 include_directories(
