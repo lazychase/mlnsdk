@@ -89,7 +89,7 @@ namespace mln::net {
     inline static HttpCoroHandlerMap httpCoroHandlers;
 
     // Return a reasonable mime type based on the extension of a file.
-    boost::beast::string_view
+    static boost::beast::string_view
         mime_type(boost::beast::string_view path)
     {
         using boost::beast::iequals;
@@ -126,7 +126,7 @@ namespace mln::net {
 
     // Append an HTTP rel-path to a local filesystem path.
 // The returned path is normalized for the platform.
-    std::string
+    static std::string
         path_cat(
             boost::beast::string_view base,
             boost::beast::string_view path)
@@ -253,6 +253,7 @@ namespace mln::net {
     }
 
     // Handles an HTTP server connection
+    static 
     void do_session(boost::beast::tcp_stream& stream,
             std::shared_ptr<std::string const> const& doc_root,
             boost::asio::yield_context yield)
@@ -300,6 +301,7 @@ namespace mln::net {
 
 
     // Accepts incoming connections and launches the sessions
+    static 
     void do_listen(std::shared_ptr<boost::asio::io_context> ioc,
         boost::asio::ip::tcp::endpoint endpoint,
         std::shared_ptr<std::string const> const& doc_root,
