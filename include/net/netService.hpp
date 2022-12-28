@@ -322,7 +322,7 @@ namespace mln::net {
 			}
 			s_threads.clear();
 
-			LOGI("mlnnet stop..");
+			LOGI("mlnnet service stop..");
 		}
 
 		static void setWork() {

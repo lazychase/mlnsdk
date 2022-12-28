@@ -311,6 +311,13 @@ namespace mln::net {
                         ioc->run();
                     });
             ioc->run();
+
+            for (std::thread& t : v) {
+                t.join();
+            }
+            v.clear();
+
+            LOGI("mlnnet httpServerCoro stop..");
         }
 
     private:
@@ -345,7 +352,7 @@ namespace mln::net {
             if (ec)
                 return fail(ec, "listen");
 
-            while (true) {
+            while (!ioc->stopped()) {
                 boost::asio::ip::tcp::socket socket(*ioc.get());
                 acceptor.async_accept(socket, yield[ec]);
                 if (ec)
