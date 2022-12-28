@@ -86,7 +86,7 @@ namespace mln::net {
     //using HttpCoroHandlerType = std::function<void(HeaderMap&&, boost::json::value&&, send_lambda&&, bool, unsigned int)>;
     
     using HttpCoroHandlerMap = std::map<std::string, HttpCoroHandlerType>;
-    inline static HttpCoroHandlerMap httpCoroHandlers;
+    
 
     // Return a reasonable mime type based on the extension of a file.
     static boost::beast::string_view
@@ -151,11 +151,10 @@ namespace mln::net {
         return result;
     }
 
-
     // This function produces an HTTP response for the given
-// request. The type of the response object depends on the
-// contents of the request, so the interface requires the
-// caller to pass a generic lambda for receiving the response.
+        // request. The type of the response object depends on the
+        // contents of the request, so the interface requires the
+        // caller to pass a generic lambda for receiving the response.
     template<
         class Body, class Allocator,
         class Send>
@@ -163,7 +162,9 @@ namespace mln::net {
         handle_request(
             boost::beast::string_view doc_root,
             boost::beast::http::request<Body, boost::beast::http::basic_fields<Allocator>>&& req,
-            Send&& sender)
+            Send&& sender,
+            HttpCoroHandlerMap &httpCoroHandlerMap
+        )
     {
         // Returns a bad request response
         auto const bad_request =
@@ -222,8 +223,8 @@ namespace mln::net {
         // Build the path to the requested file
         std::string path = path_cat(doc_root, req.target());
 
-        auto it = httpCoroHandlers.find(path);
-        if (httpCoroHandlers.end() == it) {
+        auto it = httpCoroHandlerMap.find(path);
+        if (httpCoroHandlerMap.end() == it) {
             return sender(not_found(req.target()));
         }
 
@@ -249,102 +250,9 @@ namespace mln::net {
         headerMap.emplace("__path__", path);
 
         it->second(std::move(headerMap), std::move(reqBodyString), std::move(sender), req.keep_alive(), req.version());
-        
     }
 
-    // Handles an HTTP server connection
-    static 
-    void do_session(boost::beast::tcp_stream& stream,
-            std::shared_ptr<std::string const> const& doc_root,
-            boost::asio::yield_context yield)
-    {
-        bool close = false;
-        boost::beast::error_code ec;
-
-        // This buffer is required to persist across reads
-        boost::beast::flat_buffer buffer;
-
-        // This lambda is used to send messages
-        send_lambda lambda{ stream, close, ec, yield };
-
-        for (;;)
-        {
-            // Set the timeout.
-            stream.expires_after(std::chrono::seconds(30));
-
-            // Read a request
-            boost::beast::http::request<boost::beast::http::string_body> req;
-            boost::beast::http::async_read(stream, buffer, req, yield[ec]);
-            if (ec == boost::beast::http::error::end_of_stream)
-                break;
-            if (ec)
-                return fail(ec, "read");
-
-            // Send the response
-            handle_request(*doc_root, std::move(req), lambda);
-            
-            if (ec)
-                return fail(ec, "write");
-            if (close)
-            {
-                // This means we should close the connection, usually because
-                // the response indicated the "Connection: close" semantic.
-                break;
-            }
-        }
-
-        // Send a TCP shutdown
-        stream.socket().shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
-
-        // At this point the connection is closed gracefully
-    }
-
-
-    // Accepts incoming connections and launches the sessions
-    static 
-    void do_listen(std::shared_ptr<boost::asio::io_context> ioc,
-        boost::asio::ip::tcp::endpoint endpoint,
-        std::shared_ptr<std::string const> const& doc_root,
-        boost::asio::yield_context yield)
-    {
-        boost::beast::error_code ec;
-
-        // Open the acceptor
-        boost::asio::ip::tcp::acceptor acceptor(*ioc.get());
-        acceptor.open(endpoint.protocol(), ec);
-        if (ec)
-            return fail(ec, "open");
-
-        // Allow address reuse
-        acceptor.set_option(boost::asio::socket_base::reuse_address(true), ec);
-        if (ec)
-            return fail(ec, "set_option");
-
-        // Bind to the server address
-        acceptor.bind(endpoint, ec);
-        if (ec)
-            return fail(ec, "bind");
-
-        // Start listening for connections
-        acceptor.listen(boost::asio::socket_base::max_listen_connections, ec);
-        if (ec)
-            return fail(ec, "listen");
-
-        while(true) {
-            boost::asio::ip::tcp::socket socket(*ioc.get());
-            acceptor.async_accept(socket, yield[ec]);
-            if (ec)
-                fail(ec, "accept");
-            else
-                boost::asio::spawn(
-                    acceptor.get_executor(),
-                        std::bind(
-                            &do_session,
-                            boost::beast::tcp_stream(std::move(socket)),
-                            doc_root,
-                            std::placeholders::_1));
-        }
-    }
+   
 
     class HttpServerCoro 
     {
@@ -404,5 +312,107 @@ namespace mln::net {
                     });
             ioc->run();
         }
+
+    private:
+
+        // Accepts incoming connections and launches the sessions
+        static
+            void do_listen(std::shared_ptr<boost::asio::io_context> ioc,
+                boost::asio::ip::tcp::endpoint endpoint,
+                std::shared_ptr<std::string const> const& doc_root,
+                boost::asio::yield_context yield)
+        {
+            boost::beast::error_code ec;
+
+            // Open the acceptor
+            boost::asio::ip::tcp::acceptor acceptor(*ioc.get());
+            acceptor.open(endpoint.protocol(), ec);
+            if (ec)
+                return fail(ec, "open");
+
+            // Allow address reuse
+            acceptor.set_option(boost::asio::socket_base::reuse_address(true), ec);
+            if (ec)
+                return fail(ec, "set_option");
+
+            // Bind to the server address
+            acceptor.bind(endpoint, ec);
+            if (ec)
+                return fail(ec, "bind");
+
+            // Start listening for connections
+            acceptor.listen(boost::asio::socket_base::max_listen_connections, ec);
+            if (ec)
+                return fail(ec, "listen");
+
+            while (true) {
+                boost::asio::ip::tcp::socket socket(*ioc.get());
+                acceptor.async_accept(socket, yield[ec]);
+                if (ec)
+                    fail(ec, "accept");
+                else
+                    boost::asio::spawn(
+                        acceptor.get_executor(),
+                        std::bind(
+                            &do_session,
+                            boost::beast::tcp_stream(std::move(socket)),
+                            doc_root,
+                            std::placeholders::_1));
+            }
+        }
+
+
+        
+
+        // Handles an HTTP server connection
+        static
+            void do_session(boost::beast::tcp_stream& stream,
+                std::shared_ptr<std::string const> const& doc_root,
+                boost::asio::yield_context yield)
+        {
+            bool close = false;
+            boost::beast::error_code ec;
+
+            // This buffer is required to persist across reads
+            boost::beast::flat_buffer buffer;
+
+            // This lambda is used to send messages
+            send_lambda lambda{ stream, close, ec, yield };
+
+            for (;;)
+            {
+                // Set the timeout.
+                stream.expires_after(std::chrono::seconds(30));
+
+                // Read a request
+                boost::beast::http::request<boost::beast::http::string_body> req;
+                boost::beast::http::async_read(stream, buffer, req, yield[ec]);
+                if (ec == boost::beast::http::error::end_of_stream)
+                    break;
+                if (ec)
+                    return fail(ec, "read");
+
+                // Send the response
+                handle_request(*doc_root, std::move(req), lambda, httpCoroHandlers);
+
+                if (ec)
+                    return fail(ec, "write");
+                if (close)
+                {
+                    // This means we should close the connection, usually because
+                    // the response indicated the "Connection: close" semantic.
+                    break;
+                }
+            }
+
+            // Send a TCP shutdown
+            stream.socket().shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
+
+            // At this point the connection is closed gracefully
+        }
+
+    private:
+
+        inline static HttpCoroHandlerMap httpCoroHandlers;
     };
 }//namespace mln::net {
