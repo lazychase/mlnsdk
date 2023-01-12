@@ -26,7 +26,7 @@ namespace mln::net {
     // Report a failure
     static void fail(boost::beast::error_code ec, char const* what)
     {
-        if (ec.value() == operation_not_permitted) {
+        if (ec.value() == boost::system::errc::operation_not_permitted) {
             if (!std::strcmp("read", what)) {
                 return;
             }
