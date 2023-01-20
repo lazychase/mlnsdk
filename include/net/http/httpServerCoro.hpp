@@ -422,6 +422,9 @@ namespace mln::net {
             stream.socket().shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
 
             // At this point the connection is closed gracefully
+
+
+            stream.socket().close(ec);
         }
 
     private:

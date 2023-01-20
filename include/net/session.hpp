@@ -494,11 +494,15 @@ namespace mln::net
 				if (SessionType::TCP == _sessionType) {
 					if (socket().is_open()) {
 						socket().shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+						socket().close(ec);
 					}
 				}
 				else {
 					if (websocket().is_open()) {
 						websocket().close(boost::beast::websocket::close_code::normal, ec);
+
+						boost::beast::websocket::close_reason ignoreReason;
+						websocket().close(ignoreReason, ec);
 					}
 				}
 
