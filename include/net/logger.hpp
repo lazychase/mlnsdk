@@ -14,8 +14,12 @@
 #define FMT_HEADER_ONLY
 #endif
 
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE // Must: define SPDLOG_ACTIVE_LEVEL before `#include "spdlog/spdlog.h"`
+
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_sinks.h>
+//#include <spdlog/sinks/stdout_color_sinks.h>
+//#include <spdlog/sinks/ansicolor_sink.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 
@@ -25,28 +29,30 @@
 
 namespace mln::net
 {
-	static const char* LOG_PATTERN_DEFAULT = "[%D %T] [%n] [%t] [%l] : %v";
+	/*static const char* LOG_PATTERN_DEFAULT = "[%D %T] [%n] [%t] [%l] : %v";*/
+	/*static const char* LOG_PATTERN_DEFAULT = "[%D %T] [%n] [%t] [%l] [source %s] [function %!] [line %#] : %v";*/
+	static const char* LOG_PATTERN_DEFAULT = "[%D %T][%t][%l][%s %! %#] : %v";
 
 	class Logger
 	{
 	public:
-		static Logger& instance() {static Logger _instance;return _instance;}
-		
+		static Logger& instance() { static Logger _instance; return _instance; }
+
 		static void createDefault() {
 
 			Logger::instance().Create()
 				.global()
-					.loggerName("mln-server-log")
-					.flushEverySec(0)
+				.loggerName("mln-server-log")
+				.flushEverySec(0)
 				.console()
-					.lv(spdlog::level::trace)
-					.pattern(nullptr)
+				.lv(spdlog::level::trace)
+				.pattern(nullptr)
 				.file()
-					.lv(spdlog::level::trace)
-					.pattern(nullptr)
+				.lv(spdlog::level::trace)
+				.pattern(nullptr)
 				.fileNameBase("mln-server")
-					.maxFileSize(1048576 * 100)
-					.maxFiles(30)
+				.maxFileSize(1048576 * 100)
+				.maxFiles(30)
 				.done();
 		}
 
@@ -78,7 +84,7 @@ namespace mln::net
 
 			GlobalConfig(Initializer& init)
 				: init_(init)
-				, Switcher(init) 
+				, Switcher(init)
 			{
 			}
 
@@ -184,7 +190,6 @@ namespace mln::net
 			GlobalConfig& global() { return global_; }
 			Config& console() { return console_; }
 			ConfigFile& file() { return file_; }
-			//Config& packetDump() { return packetDump_; }
 			void done() {
 				std::vector<spdlog::sink_ptr> sinks;
 
@@ -299,10 +304,12 @@ namespace mln::net
 
 //#define _LTRACE(...)	((void)(0))
 
-#define LOGT		mln::net::Logger::instance()._logger->trace
-#define LOGD		mln::net::Logger::instance()._logger->debug
-#define LOGI		mln::net::Logger::instance()._logger->info
-#define LOGW		mln::net::Logger::instance()._logger->warn
-#define LOGE		mln::net::Logger::instance()._logger->error
-#define LOGC		mln::net::Logger::instance()._logger->critical
+#define LOGT(...)	SPDLOG_LOGGER_TRACE(mln::net::Logger::instance()._logger, __VA_ARGS__)
+#define LOGD(...)	SPDLOG_LOGGER_DEBUG(mln::net::Logger::instance()._logger, __VA_ARGS__)
+#define LOGI(...)	SPDLOG_LOGGER_INFO(mln::net::Logger::instance()._logger, __VA_ARGS__)
+#define LOGW(...)	SPDLOG_LOGGER_WARN(mln::net::Logger::instance()._logger, __VA_ARGS__)
+#define LOGE(...)	SPDLOG_LOGGER_ERROR(mln::net::Logger::instance()._logger, __VA_ARGS__)
+#define LOGC(...)	SPDLOG_LOGGER_CRITICAL(mln::net::Logger::instance()._logger, __VA_ARGS__)
+
+
 
