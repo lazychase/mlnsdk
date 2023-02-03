@@ -42,7 +42,7 @@ namespace mln::net {
 		}
 		
 		template < typename T >
-		bool addUserBase(Session::sptr session) {
+		std::shared_ptr<T> addUserBase(Session::sptr session) {
 			if (session->getUser()) {
 				[[unlikely]]
 				LOGE("created userobj already. ident:{}", session->getIdentity());
@@ -55,9 +55,9 @@ namespace mln::net {
 			if (false == _users.insert({ session->getIdentity(), session }).second) {
 				[[unlikely]]
 				LOGE("failed insert user. identity : {}", session->getIdentity());
-				return false;
+				return nullptr;
 			}
-			return true;
+			return std::static_pointer_cast<T>(user);
 		}
 
 		template < typename T >
@@ -162,7 +162,7 @@ namespace mln::net {
 
 
 		template< typename USER >
-		bool addUser(Session::sptr session) {
+		std::shared_ptr<USER> addUser(Session::sptr session) {
 			return addUserBase<USER>(session);
 		}
 
