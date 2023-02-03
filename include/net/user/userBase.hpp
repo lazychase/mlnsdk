@@ -72,11 +72,11 @@ namespace mln::net {
 		}
 
 
-		std::optional<Session::sptr> getSession() {
+		Session::sptr getSession() {
 			if (auto session = _session.lock(); session) {
 				return session;
 			}
-			return std::nullopt;
+			return nullptr;
 		}
 
 		void closeReserve(const size_t timeAfterMs) {

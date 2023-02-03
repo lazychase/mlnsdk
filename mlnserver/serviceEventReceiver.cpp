@@ -72,10 +72,10 @@ void ServiceEventReceiver::initHandler(PacketProcedure* packetProcedure)
 		) {
 
 			assert(url == "/lobby/login");
-			auto sessionOpt = userBase->getSession();
+			auto spSession = userBase->getSession();
 			std::string sessionTypeString;
-			if (sessionOpt.has_value()) {
-				sessionTypeString = sessionOpt.value()->getSessionTypeString();
+			if (spSession) {
+				sessionTypeString = spSession->getSessionTypeString();
 			}
 
 			LOGD("received packet from client. (C->S) url:{}, sessionType:{}"

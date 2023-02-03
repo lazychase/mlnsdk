@@ -16,15 +16,15 @@ namespace mln::net {
 
 		const static size_t DEFAULT_BUFFER_SIZE = 1024 * 8;
 
-		ByteStream()
-			: _buffer(DEFAULT_BUFFER_SIZE)
+		ByteStream(const size_t bufferSize = DEFAULT_BUFFER_SIZE)
+			: _buffer(bufferSize)
 		{
 			clear();
 		}
 
-		ByteStream(PacketManipulator* packetManip, const bool preWriteAsHeaderSize /*= false*/)
+		ByteStream(PacketManipulator* packetManip, const bool preWriteAsHeaderSize, const size_t bufferSize = DEFAULT_BUFFER_SIZE)
 			: _packetManipulator(packetManip)
-			, _buffer(DEFAULT_BUFFER_SIZE)
+			, _buffer(bufferSize)
 		{
 			clear();
 
