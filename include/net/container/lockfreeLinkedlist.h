@@ -2,6 +2,10 @@
 
 //src : https://github.com/bhhbazinga/LockFreeLinkedList
 
+#pragma warning( push )
+#pragma warning( disable : 4311 )
+#pragma warning( disable : 4312 )
+
 #include <atomic>
 #include <cstdio>
 
@@ -341,3 +345,6 @@ try_again:
     assert(false);
     return false;
 }
+
+
+#pragma warning ( pop )
