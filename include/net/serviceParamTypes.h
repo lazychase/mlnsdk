@@ -2,7 +2,6 @@
 
 #include "netTypes.h"
 
-#include <boost/asio.hpp>
 #include "eventReceiver.hpp"
 #include "packetProcedure.hpp"
 

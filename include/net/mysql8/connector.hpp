@@ -1,7 +1,6 @@
 #pragma once
 
 #include <mysqlx/xdevapi.h>
-
 #include <cpprest/base_uri.h>
 #include <net/logger.hpp>
 #include <optional>

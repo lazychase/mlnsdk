@@ -6,11 +6,6 @@
 #pragma warning( disable : 4311 )
 #pragma warning( disable : 4312 )
 
-#include <atomic>
-#include <cstdio>
-
-#include <iostream>
-
 #include "reclaimer.h"
 
 template <typename T>

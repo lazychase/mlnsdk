@@ -1,17 +1,5 @@
 #pragma once
 
-#include <boost/beast/core.hpp>
-#include <boost/beast/http.hpp>
-#include <boost/beast/version.hpp>
-#include <boost/asio/ip/tcp.hpp>
-#include <boost/asio/spawn.hpp>
-#include <boost/config.hpp>
-#include <boost/json.hpp>
-
-#include <memory>
-
-#include <net/logger.hpp>
-
 
 #ifndef SEND_INE
 #ifdef _WIN32

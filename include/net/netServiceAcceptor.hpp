@@ -1,9 +1,5 @@
 #pragma once
 
-#include <boost/asio.hpp>
-#include <boost/bind/bind.hpp>
-#include <boost/thread.hpp>
-
 #include "netTypes.h"
 #include "session.hpp"
 #include "packetProcedure.hpp"

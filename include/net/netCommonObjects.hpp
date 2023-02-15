@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-#include <boost/asio.hpp>
 #include "eventReceiver.hpp"
 #include "serviceParamTypes.h"
 

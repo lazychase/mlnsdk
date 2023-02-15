@@ -1,8 +1,5 @@
 #pragma once
 
-#include <string>
-#include <boost/algorithm/string.hpp>
-
 namespace mln::net {
 
 	class StringHelper

@@ -1,20 +1,5 @@
 ﻿#pragma once
 
-#ifdef MLN_USE_BEAST_WEBSOCKET
-#include <boost/beast.hpp>
-#include <boost/beast/websocket.hpp>
-#endif
-
-#include <functional>
-#include <memory>
-#include <optional>
-#include <span>
-
-//#include "boostInclude.h"
-
-#include <boost/asio.hpp>
-#include <boost/bind/bind.hpp>
-
 #include "boostObjectPool.hpp"
 #include "eventReceiver.hpp"
 #include "byteStream.hpp"

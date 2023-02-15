@@ -1,14 +1,5 @@
 #pragma once
 
-#include <boost/beast/core.hpp>
-#include <boost/beast/http.hpp>
-#include <boost/beast/version.hpp>
-#include <boost/asio/ip/tcp.hpp>
-
-#include <net/logger.hpp>
-
-#include <map>
-
 namespace mln::net {
     class HttpServer
     {

@@ -1,13 +1,8 @@
 ﻿#pragma once
 
-#include <optional>
-#include <memory>
-
 #include "../netTypes.h"
 #include "../session.hpp"
 #include "../enc/packetEncType.h"
-
-
 
 namespace mln::net {
 

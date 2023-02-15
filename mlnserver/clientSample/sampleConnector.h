@@ -1,18 +1,7 @@
 #pragma once
 
-#include <net/session.hpp>
-#include <net/logger.hpp>
-#include <net/packetProcedure.hpp>
-#include <net/netService.hpp>
-#include <net/user/userBase.hpp>
 
-#include <net/packetJson/handler.hpp>
 #include "../user.h"
-
-#if defined (MLN_NET_USE_JSONPARSER_BOOSTJSON)
-#include <boost/json.hpp>
-#include <iostream>
-#endif
 
 namespace mlnserver {
 

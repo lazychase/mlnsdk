@@ -1,13 +1,5 @@
 #pragma once
 
-#include <atomic>
-#include <cassert>
-#include <functional>
-#include <thread>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
-
 class HazardPointer;
 
 class Reclaimer {

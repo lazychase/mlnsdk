@@ -1,17 +1,6 @@
 #pragma once
 
-#include <functional>
-#include <memory>
-#include <optional>
-#include <stdint.h>
-
-#include <boost/asio.hpp>
-#include <boost/bind.hpp>
-#include <boost/chrono.hpp>
-
 namespace mln::net {
-
-	
 
 	template < size_t MAX_SCHEDULES, size_t TIME_INCREMENT_SIZE_MS >
 	class SimpleScheduler

@@ -71,6 +71,13 @@ endif()
         #mysqlcppconn8
         ${Boost_LIBRARIES}
     )
+
+    IF(COMMAND target_precompile_headers)
+        target_precompile_headers(mlnserver
+            PRIVATE "${CMAKE_SOURCE_DIR}/mlnserver/mlnserver_pch.h"
+            #PRIVATE "${CMAKE_SOURCE_DIR}/net/mlnnet_pch.h"
+        )
+    ENDIF()
     
     file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/netconfig.json
         DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin )

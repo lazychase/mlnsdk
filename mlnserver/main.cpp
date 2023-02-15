@@ -1,17 +1,6 @@
-﻿#include <net/session.hpp>
-#include <net/logger.hpp>
-#include <net/http/httpServer.hpp>
-
-#ifdef _WIN32
-#include <net/exceptionHandler.hpp>
-#endif
-
-#include <net/netService.hpp>
-#include <net/packetJson/packetParser.hpp>
+﻿
 #include "asioContext.h"
 #include "serviceEventReceiver.h"
-
-
 #include "clientSample/run.h"
 
 

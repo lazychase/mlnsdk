@@ -1,9 +1,5 @@
 #pragma once
 
-#include <net/packetJson/protocol.h>
-#include <net/user/userBase.hpp>
-#include <net/boostObjectPool.hpp>
-
 namespace mlnserver {
 
 	class User

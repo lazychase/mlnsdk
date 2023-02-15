@@ -1,7 +1,5 @@
 #pragma once
 
-#include <atomic>
-#include <memory>
 #include "eventReceiver.hpp"
 #include "netServiceAcceptor.hpp"
 #include "netServiceConnector.hpp"

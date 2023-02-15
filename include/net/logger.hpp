@@ -1,11 +1,5 @@
 #pragma once
 
-#include <memory>
-#include <mutex>
-#include <string>
-#include <sstream>
-#include <vector>
-
 //#ifndef SPDLOG_FMT_EXTERNAL
 //#define SPDLOG_FMT_EXTERNAL
 //#endif
@@ -14,18 +8,9 @@
 #define FMT_HEADER_ONLY
 #endif
 
+#ifndef SPDLOG_ACTIVE_LEVEL
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE // Must: define SPDLOG_ACTIVE_LEVEL before `#include "spdlog/spdlog.h"`
-
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/stdout_sinks.h>
-//#include <spdlog/sinks/stdout_color_sinks.h>
-//#include <spdlog/sinks/ansicolor_sink.h>
-#include <spdlog/sinks/basic_file_sink.h>
-#include <spdlog/sinks/rotating_file_sink.h>
-
-//namespace spdlog {
-//	class logger;
-//}
+#endif
 
 namespace mln::net
 {

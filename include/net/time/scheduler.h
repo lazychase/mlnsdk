@@ -1,13 +1,5 @@
 #pragma once
 
-#include <functional>
-#include <memory>
-#include <stdint.h>
-
-#include <boost/asio.hpp>
-#include <boost/bind.hpp>
-#include <boost/chrono.hpp>
-
 namespace mln::net {
 {
 	template < size_t MAX_SCHEDULES >

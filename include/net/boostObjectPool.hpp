@@ -1,10 +1,5 @@
 #pragma once
 
-#include <mutex>
-#include <type_traits>
-
-#include <boost/pool/pool.hpp>
-
 namespace mln::net {
 	template<typename OBJ_TYPE>
 	class BoostObjectPool

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <string>
-#include <boost/asio.hpp>
 #include "netTypes.h"
 #include "session.hpp"
 #include "packetProcedure.hpp"
