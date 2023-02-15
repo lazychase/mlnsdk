@@ -10,22 +10,22 @@ openssl
 * c++20
   * msvc : visual studio 2019 16.11 이상
   * linux : gcc11
-* CMake [>=3.12 <= 3.18]
-  * [cmake 3.18 release](https://github.com/Kitware/CMake/releases/tag/v3.18.6)
+* CMake [>=3.12 <= 3.21]
+  * [cmake 3.21 release](https://github.com/Kitware/CMake/releases/tag/v3.21.7)
 * Boost 1.78
 * Boost Json
+* Boost MySQL(https://github.com/boostorg/mysql)
 * openSSL
 * AWS SDK for C++
-* MySQL Connector/C++ 8.x
 
 ### CMake
-[AWS SDK for C++ 를 빌드](https://docs.aws.amazon.com/sdk-for-cpp/v1/developer-guide/setup-linux.html)하려면 3.18 이하 버젼이어야 합니다.
+[AWS SDK for C++ 를 빌드](https://docs.aws.amazon.com/sdk-for-cpp/v1/developer-guide/setup-linux.html)하려면 3.21 이하 버젼이어야 합니다.
 ```
- (minimum version 3.2; maximum version 3.18)
+ (minimum version 3.2; maximum version 3.21)(2023-02-15 시점)
 ```
 
 ### Boost
-1.78 버젼을 기준으로 작성되고 있습니다. 
+1.80 버젼을 기준으로 작성되고 있습니다. 
 
 
 ### Boost Json
