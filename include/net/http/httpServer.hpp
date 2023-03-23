@@ -761,8 +761,9 @@ namespace mln::net {
         LOGT("<restsvc:op> header:", path, req.body());
         for (auto& header : req.base())
         {
-            headerMap.emplace(lower(header.name_string().to_string()), lower(header.value().to_string()));
-            LOGT("{}: {}", header.name_string().to_string(), header.value().to_string());
+            //headerMap.emplace(lower(header.name_string().to_string()), lower(header.value().to_string()));
+            headerMap.emplace(lower({ header.name_string().begin(), header.name_string().end() }), lower({ header.value().begin(), header.value().end() }));
+            //LOGT("{}: {}", header.name_string().to_string(), header.value().to_string());
         }
 
         std::string reqBodyString = req.body();
