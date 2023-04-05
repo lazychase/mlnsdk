@@ -39,7 +39,7 @@ endif()
 set(Boost_USE_MULTITHREADED      ON)
 # set(Boost_USE_STATIC_RUNTIME    OFF)
 
-find_package(Boost 1.80 REQUIRED system date_time thread chrono json)
+find_package(Boost 1.80 REQUIRED system date_time thread chrono json iostreams)
 if(Boost_FOUND)
     message(STATUS "---------------------")
     message(STATUS "Boost_FOUND: ${Boost_FOUND}")

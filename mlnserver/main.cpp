@@ -2,10 +2,12 @@
 #include "asioContext.h"
 #include "serviceEventReceiver.h"
 #include "clientSample/run.h"
+#include <net/compression/gzip.hpp>
 
 
 bool ioServiceThread();
 void testHttpServer();
+void testCompression();
 
 int main(int argc, char* argv[])
 {
@@ -25,6 +27,7 @@ int main(int argc, char* argv[])
 #endif
 
 	testHttpServer();
+	testCompression();
 
 
 	return ioServiceThread();
@@ -107,4 +110,9 @@ void testHttpServer()
 
 	mln::net::HttpServer::instance().startAsync(28888, g_ioc);
 
+}
+
+void testCompression()
+{
+	testGzip();
 }

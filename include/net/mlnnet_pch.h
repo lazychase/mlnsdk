@@ -14,10 +14,10 @@
 //#define BOOST_THREAD_DONT_PROVIDE_SHARED_MUTEX_UPWARDS_CONVERSION
 //#define BOOST_THREAD_DONT_PROVIDE_PROMISE_LAZY
 
-#define BOOST_ASIO_HAS_MOVE
-#define BOOST_THREAD_PROVIDES_FUTURE
-#define BOOST_THREAD_PROVIDES_FUTURE_UNWRAP
-#define BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION
+//#define BOOST_ASIO_HAS_MOVE
+//#define BOOST_THREAD_PROVIDES_FUTURE
+//#define BOOST_THREAD_PROVIDES_FUTURE_UNWRAP
+//#define BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION
 
 
 #include <atomic>
@@ -43,6 +43,18 @@
 #include <boost/pool/pool.hpp>
 #include <boost/thread.hpp>
 
+
+
+// for gzip
+#include <boost/iostreams/copy.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
+#include <boost/iostreams/filtering_streambuf.hpp>
+//#include <iostream>
+//#include <sstream>
+#include <boost/archive/iterators/binary_from_base64.hpp>
+#include <boost/archive/iterators/base64_from_binary.hpp>
+#include <boost/archive/iterators/transform_width.hpp>
+//
 
 
 

@@ -2,12 +2,12 @@
 
 namespace mln::net{
 
-	typedef struct tagEncType {
+	struct EncType {
 		using Type = uint16_t;
 
 		enum {
 			GREETING = 0,
 		};
 
-	}EncType;
+	};
 }//namespace mln::net{
