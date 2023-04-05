@@ -8,6 +8,8 @@
 //#include <boost/archive/iterators/base64_from_binary.hpp>
 //#include <boost/archive/iterators/transform_width.hpp>
 
+namespace mln::net::compression::gzip {
+
 std::string decode64(std::string const& val)
 {
     using namespace boost::archive::iterators;
@@ -58,8 +60,12 @@ static std::string decompress(const std::string& data)
     return origin.str();
 }
 
+}//namespace mln::net::compression::gzip {
+
 void testGzip()
 {
+    using namespace mln::net::compression::gzip;
+
     auto msg = encode64(compress("my message"));
     std::cout << msg << std::endl;
     std::cout << decompress(decode64(msg)) << std::endl;
