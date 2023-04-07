@@ -10,7 +10,7 @@
 
 namespace mln::net::compression::gzip {
 
-std::string decode64(std::string const& val)
+static std::string decode64(std::string const& val)
 {
     using namespace boost::archive::iterators;
     return {
@@ -20,7 +20,7 @@ std::string decode64(std::string const& val)
     };
 }
 
-std::string encode64(std::string const& val)
+static std::string encode64(std::string const& val)
 {
     using namespace boost::archive::iterators;
     std::string r{
@@ -62,7 +62,7 @@ static std::string decompress(const std::string& data)
 
 }//namespace mln::net::compression::gzip {
 
-void testGzip()
+static void testGzip()
 {
     using namespace mln::net::compression::gzip;
 
