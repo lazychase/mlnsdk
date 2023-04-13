@@ -3,6 +3,10 @@
 #include "boostObjectPool.hpp"
 #include "netTypes.h"
 
+#ifndef MLNNET_BYTE_STREAM_BUFFER_SIZE
+#define MLNNET_BYTE_STREAM_BUFFER_SIZE	8192
+#endif
+
 namespace mln::net {
 
 	class ByteStream
@@ -11,7 +15,7 @@ namespace mln::net {
 	public:
 		using sptr = std::shared_ptr< ByteStream >;
 
-		const static size_t DEFAULT_BUFFER_SIZE = 1024 * 8;
+		const static size_t DEFAULT_BUFFER_SIZE = MLNNET_BYTE_STREAM_BUFFER_SIZE;
 
 		ByteStream(const size_t bufferSize = DEFAULT_BUFFER_SIZE)
 			: _buffer(bufferSize)
